@@ -1,6 +1,6 @@
 # [WIP] Medium Rare Potato restaurant management script
 
-Script made to manage your restaurant
+QoL script made to manage your restaurant
 
 # Important
 
@@ -34,5 +34,6 @@ You have two ways of using this user script:
 
 1. Logger
 2. Filter dish pull by character rarity
-3. Page reload (maybe)
-4. getMaxProfitableCombinationOfDishIds function optimization (maybe)
+3. Using setInterval instead of while infinity loop, to decrease needles request to API to minimum
+4. Page reload (maybe)
+5. getMaxProfitableCombinationOfDishIds function optimization (maybe)

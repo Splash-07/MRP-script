@@ -2,6 +2,7 @@ import { Restaurant } from "./../types/index";
 import { Character, Params } from "../types";
 import Helper from "./helper";
 import restaurantManager from "./restaurantManager";
+import logger from "./logger";
 
 const API = {
   getRestaurants: async () => {
@@ -31,10 +32,10 @@ const API = {
       );
       const resData = await res.json();
       const restaurantList: Restaurant[] = resData.restaurant_list.results;
-      console.log("restaurant:", restaurantList);
+      // console.log("restaurant:", restaurantList);
       return restaurantList;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      logger(`${error.message}`);
     }
   },
 
@@ -51,10 +52,10 @@ const API = {
       const res = await fetch(`/v1/user/characters/`, options);
       const resData = await res.json();
       const characterList: Character[] = resData.character_list.results;
-      console.log("characters:", characterList);
+      // console.log("characters:", characterList);
       return characterList;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      logger(`${error.message}`);
     }
   },
 
@@ -71,10 +72,10 @@ const API = {
       const res = await fetch(`/v1/user/dishes/`, options);
       const resData = await res.json();
       const dishesList = resData.dish_list.results;
-      console.log("dishes:", dishesList);
+      // console.log("dishes:", dishesList);
       return dishesList;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      logger(`${error.message}`);
     }
   },
 
@@ -102,11 +103,12 @@ const API = {
         options
       );
       const resData = await res.json();
-      console.log("Started cooking", resData);
+      logger(`Started cooking`);
+      console.log("Start cooking with response data:", resData);
       await Helper.sleep(5000);
       await restaurantManager.manageRestaurants();
-    } catch (error) {
-      console.log("Failed to start cooking", error);
+    } catch (error: any) {
+      logger(`${error.message}`);
     }
   },
   openRestaurant: async (restaurantId: string) => {
@@ -124,11 +126,12 @@ const API = {
         options
       );
       const resData = await res.json();
-      console.log("Restaurant has been opened", resData);
+      logger(`Restaurant with has been opened`);
+      console.log("Open restaurant response data:", resData);
       await Helper.sleep(5000);
       await restaurantManager.manageRestaurants();
-    } catch (error) {
-      console.log("Failed to open restaurant", error);
+    } catch (error: any) {
+      logger(`${error.message}`);
     }
   },
 };

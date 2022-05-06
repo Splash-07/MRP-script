@@ -25,7 +25,7 @@ You have two ways of using this user script:
   - Checking if character is free
   - If character is free, then finding the best profitable combination of dishes, that accumulative cook time less or equal then 180 minutes
     - Finding best profitable restaurant dish (dish with max profit per minute ratio)
-    - [WIP] Finding best chef dish (dish with max profit per minute ratio)
+    - Finding best chef dish (dish with max profit per minute ratio)
     - Combining them with all dishes, that character can cook
     - Finding combination of dishes for maximum profit
 - Repeat in 2 minutes

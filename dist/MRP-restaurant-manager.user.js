@@ -2,7 +2,7 @@
                      // @name         Medium Rare Potato restaurant management script
                      // @description  Script made to manage your restaurant in https://game.medium-rare-potato.io/
                      // @namespace    https://github.com/Splash-07/MRP-script
-                     // @version      1.0.0
+                     // @version      1.1.0
                      // @author       Splash-07 (https://github.com/Splash-07)
                      // @match        https://game.medium-rare-potato.io/*
                      // ==/UserScript==
@@ -16,8 +16,9 @@
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const api_1 = __webpack_require__(2);
-const config_1 = __webpack_require__(4);
+const config_1 = __webpack_require__(5);
 const helper_1 = __webpack_require__(3);
+const logger_1 = __webpack_require__(4);
 const restaurantManager = {
     async manageRestaurants() {
         const myRestaurants = await api_1.default.getRestaurants();
@@ -74,11 +75,9 @@ const restaurantManager = {
                 }
             }
             else {
-                console.log("not ready to cook");
             }
         }
         else {
-            console.log("restaurant is closed");
         }
     },
     getDishIdsToCook(chefDishCards, restaurantDishCards, characterDishCards, helpersAccelerationRate) {
@@ -182,7 +181,7 @@ const restaurantManager = {
             n--;
             i--;
         }
-        console.log("debug array", debugArray);
+        console.log("Best dish combination", debugArray);
         return result;
     },
     findBestRatioDish(dishList) {
@@ -197,9 +196,9 @@ const restaurantManager = {
             character.restaurant_worker_contracts.length > 0);
     },
     async init() {
-        console.log("Script will start working in 10 seconds");
+        (0, logger_1.default)("Script will start working in 10 seconds");
         await helper_1.default.sleep(10000);
-        console.log("Restaurant manager initialized");
+        (0, logger_1.default)("Restaurant manager initialized");
         while (true) {
             await this.manageRestaurants();
             await helper_1.default.sleep(120000);
@@ -217,6 +216,7 @@ exports["default"] = restaurantManager;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const helper_1 = __webpack_require__(3);
 const restaurantManager_1 = __webpack_require__(1);
+const logger_1 = __webpack_require__(4);
 const API = {
     getRestaurants: async () => {
         const params = {
@@ -241,11 +241,10 @@ const API = {
             const res = await fetch(`/v1/user/restaurants/?${helper_1.default.queryParamsToString(params)}`, options);
             const resData = await res.json();
             const restaurantList = resData.restaurant_list.results;
-            console.log("restaurant:", restaurantList);
             return restaurantList;
         }
         catch (error) {
-            console.log(error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
     getCharacters: async () => {
@@ -260,11 +259,10 @@ const API = {
             const res = await fetch(`/v1/user/characters/`, options);
             const resData = await res.json();
             const characterList = resData.character_list.results;
-            console.log("characters:", characterList);
             return characterList;
         }
         catch (error) {
-            console.log(error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
     getDishes: async () => {
@@ -279,11 +277,10 @@ const API = {
             const res = await fetch(`/v1/user/dishes/`, options);
             const resData = await res.json();
             const dishesList = resData.dish_list.results;
-            console.log("dishes:", dishesList);
             return dishesList;
         }
         catch (error) {
-            console.log(error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
     startCooking: async (restaurantId, workerCardId, dishIds) => {
@@ -302,12 +299,13 @@ const API = {
         try {
             const res = await fetch(`/v1/restaurants/${restaurantId}/start-cook/`, options);
             const resData = await res.json();
-            console.log("Started cooking", resData);
+            (0, logger_1.default)(`Started cooking`);
+            console.log("Start cooking with response data:", resData);
             await helper_1.default.sleep(5000);
             await restaurantManager_1.default.manageRestaurants();
         }
         catch (error) {
-            console.log("Failed to start cooking", error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
     openRestaurant: async (restaurantId) => {
@@ -321,12 +319,13 @@ const API = {
         try {
             const res = await fetch(`/v1/user/restaurants/${restaurantId}/open/`, options);
             const resData = await res.json();
-            console.log("Restaurant has been opened", resData);
+            (0, logger_1.default)(`Restaurant with has been opened`);
+            console.log("Open restaurant response data:", resData);
             await helper_1.default.sleep(5000);
             await restaurantManager_1.default.manageRestaurants();
         }
         catch (error) {
-            console.log("Failed to open restaurant", error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
 };
@@ -354,6 +353,33 @@ exports["default"] = Helper;
 
 /***/ }),
 /* 4 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const logger = (message) => {
+    const currentTime = new Date();
+    const timer = `${currentTime.getHours() >= 10
+        ? currentTime.getHours()
+        : currentTime.getHours() < 10 && currentTime.getHours() > 0
+            ? `0${currentTime.getHours()}`
+            : "00"}:${currentTime.getMinutes() >= 10
+        ? currentTime.getMinutes()
+        : currentTime.getMinutes() < 10 && currentTime.getMinutes() > 0
+            ? `0${currentTime.getMinutes()}`
+            : "00"}:${currentTime.getSeconds() >= 10
+        ? currentTime.getSeconds()
+        : currentTime.getSeconds() < 10 && currentTime.getSeconds() > 0
+            ? `0${currentTime.getSeconds()}`
+            : "00"}`;
+    const log = `[${timer}] ${message}`;
+    console.log(log);
+};
+exports["default"] = logger;
+
+
+/***/ }),
+/* 5 */
 /***/ ((__unused_webpack_module, exports) => {
 
 

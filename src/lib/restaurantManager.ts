@@ -9,6 +9,7 @@ import {
 import API from "./api";
 import config from "./config";
 import Helper from "./helper";
+import logger from "./logger";
 
 const restaurantManager = {
   async manageRestaurants() {
@@ -95,10 +96,10 @@ const restaurantManager = {
           await API.startCooking(restaurantId, workerCardId, dishIdsToCook);
         }
       } else {
-        console.log("not ready to cook");
+        // logger("not ready to cook");
       }
     } else {
-      console.log("restaurant is closed");
+      //   logger("restaurant is closed");
     }
   },
 
@@ -247,7 +248,7 @@ const restaurantManager = {
       n--;
       i--;
     }
-    console.log("debug array", debugArray);
+    console.log("Best dish combination", debugArray);
     return result;
   },
 
@@ -268,9 +269,9 @@ const restaurantManager = {
   },
 
   async init() {
-    console.log("Script will start working in 10 seconds");
+    logger("Script will start working in 10 seconds");
     await Helper.sleep(10000);
-    console.log("Restaurant manager initialized");
+    logger("Restaurant manager initialized");
 
     while (true) {
       await this.manageRestaurants();

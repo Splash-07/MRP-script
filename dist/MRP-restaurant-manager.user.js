@@ -81,7 +81,7 @@ const restaurantManager = {
             console.log("restaurant is closed");
         }
     },
-    getDishIdsToCook(restaurantDishCards, characterDishCards, chefDishCards, helpersAccelerationRate) {
+    getDishIdsToCook(chefDishCards, restaurantDishCards, characterDishCards, helpersAccelerationRate) {
         var _a, _b;
         const restaurantDishes = restaurantDishCards.map((card) => this.getDishInfo(card, helpersAccelerationRate));
         const bestRestaurantDish = (_a = this.findBestRatioDish(restaurantDishes)) !== null && _a !== void 0 ? _a : [];

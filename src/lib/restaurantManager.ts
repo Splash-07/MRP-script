@@ -103,9 +103,9 @@ const restaurantManager = {
   },
 
   getDishIdsToCook(
+    chefDishCards: Card[],
     restaurantDishCards: Card[],
     characterDishCards: Card[],
-    chefDishCards: Card[],
     helpersAccelerationRate: number
   ) {
     const restaurantDishes = restaurantDishCards.map((card) =>
@@ -253,7 +253,6 @@ const restaurantManager = {
 
   findBestRatioDish(dishList: Dish[]): [Dish] | [] {
     if (dishList.length < 1) return [];
-
     return [
       dishList.reduce((prev, cur) =>
         cur.profit / cur.time > prev.profit / prev.time ? cur : prev

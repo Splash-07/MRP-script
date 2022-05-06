@@ -37,3 +37,7 @@ You have two ways of using this user script:
 3. Using setInterval instead of while infinity loop, to decrease needles request to API to minimum
 4. Page reload (maybe)
 5. getMaxProfitableCombinationOfDishIds function optimization (maybe)
+
+# DONATIONS
+
+Thanks for your support <3 - ivrjw.wam 

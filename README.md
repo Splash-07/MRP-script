@@ -12,7 +12,7 @@ QoL script made to manage your restaurant
 
 You have two ways of using this user script:
 
-1. Use trough Dev Tools. Open [MRP Game](http://https://game.medium-rare-potato.io), open browser Dev Tools (F12), copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in Dev Tool console and press Enter
+1. Use trough Dev Tools. Open [MRP Game](https://game.medium-rare-potato.io), open browser Dev Tools (F12), copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in Dev Tool console and press Enter
 2. Use trough tampermonkey. Install [Tampermonkey browser extension](https://www.tampermonkey.net/), open tampermonkey dashboard, copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in editor and save it
 
 # Workflow

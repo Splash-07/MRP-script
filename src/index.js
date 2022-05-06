@@ -236,7 +236,7 @@
 
     const helpersAccelerationRate = getHelpersAccelerationRate(helpers);
     const dishArray = dishPullList.map((dish) =>
-      getDishInfo(dish.atomichub_template_id, helpersAccelerationRate)
+      getDishInfo(dish, helpersAccelerationRate)
     );
 
     const maxTime = 180;
@@ -292,7 +292,7 @@
     let debugArray = [];
     while (n > 0) {
       if (cache[n][j] !== cache[n - 1][j]) {
-        result.push(dishArray[i].templateId);
+        result.push(dishArray[i].id);
         debugArray.push(dishArray[i]);
         if (i !== 0) {
           for (let k = 0; k < j; k++) {
@@ -314,12 +314,15 @@
 
     return [
       dishList.reduce((prev, cur) =>
-        cur.profit / cur.time > prev ? cur : prev
+        cur.profit / cur.time > prev.profit / prev.time ? cur : prev
       ),
     ];
   }
 
-  function getDishInfo(templateId, helpersAccelerationRate) {
+  function getDishInfo(dish, helpersAccelerationRate) {
+    const templateId = dish.atomichub_template_id;
+    const id = dish.id;
+
     const rarity = window.Config.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
     const cookTime = window.Config.dishes_time_to_cook[templateId];
 
@@ -330,6 +333,7 @@
     const profit = (cookTime / 10) * rarityCoefficient;
 
     return {
+      id,
       templateId,
       profit,
       time: acceleratedTime,

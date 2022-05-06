@@ -1,4 +1,4 @@
-# [WIP] Medium Rare Potato restaurant managment script
+# [WIP] Medium Rare Potato restaurant management script
 
 Script made to manage your restaurant
 

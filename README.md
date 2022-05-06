@@ -1,3 +1,6 @@
+# ATTENTION!
+After the last update of the game (06.05.2022), the script stopped working. I am fixing.
+
 # [WIP] Medium Rare Potato restaurant management script
 
 QoL script made to manage your restaurant

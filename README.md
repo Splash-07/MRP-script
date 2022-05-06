@@ -6,7 +6,7 @@ QoL script made to manage your restaurant
 
 - Currently tested only for one restaurant with chef
 - The script DOESN'T WORK for cooks (I don't have a cook so I can't test it yet)
-- You have to be logged in and verified on [MRP Game](http://https://game.medium-rare-potato.io) before using this script
+- You have to be logged in and verified on [MRP Game](https://game.medium-rare-potato.io) before using this script
 
 # Usage
 

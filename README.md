@@ -38,6 +38,7 @@ You have two ways of using this user script:
 4. Page reload (maybe)
 5. getMaxProfitableCombinationOfDishIds function optimization (maybe)
 
-# DONATIONS
+# DONATIONS AND CONTACTS
 
-Thanks for your support <3 - ivrjw.wam 
+My discord - Shrixy#9453
+Thanks for your support - ivrjw.wam 

@@ -40,5 +40,5 @@ You have two ways of using this user script:
 
 # DONATIONS AND CONTACTS
 
-My discord - Shrixy#9453
-Thanks for your support - ivrjw.wam 
+- My discord - Shrixy#9453
+- Thanks for your support - ivrjw.wam 

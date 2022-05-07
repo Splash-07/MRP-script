@@ -13,8 +13,9 @@ import logger from "./logger";
 
 const restaurantManager = {
   async manageRestaurants() {
+    // handle action with all possible NFTs, and collect CD, to set time for next action (decreasing needless requests)
+    // const cooldownList = []
     const myRestaurants = await API.getRestaurants();
-    const myCharacters = await API.getCharacters();
     const restaurantDishesMap: RestaurantDishMap = {};
 
     await Helper.sleep(3000);
@@ -27,6 +28,8 @@ const restaurantManager = {
         await this.handleRestaurantStatus(restaurant);
       }
     }
+
+    const myCharacters = await API.getCharacters();
 
     await Helper.sleep(3000);
     if (myCharacters) {
@@ -47,9 +50,9 @@ const restaurantManager = {
         ]) *
       msInHour;
     const openTime = new Date(restaurant.end_work).getTime() + restaurantCD;
-    const isTimerIsOver = openTime <= currentTime;
+    const isCDIsOver = openTime <= currentTime;
 
-    if (!isTimerIsOver) return;
+    if (!isCDIsOver) return;
 
     await API.openRestaurant(restaurant.id);
   },
@@ -61,7 +64,9 @@ const restaurantManager = {
     if (!this.hasContract(character)) return;
 
     const restaurantId = character.restaurant_worker_contracts[0].restaurant_id;
-    const workerCardId = character.card_id;
+    const characterCardId = character.card_id;
+    const characterId = character.id;
+
     const restaurantStartWork = new Date(
       character.restaurant_worker_contracts[0].restaurant_start_work
     ).getTime();
@@ -92,14 +97,20 @@ const restaurantManager = {
           characterDishCards,
           helpersAccelerationRate
         );
+
         if (dishIdsToCook) {
-          await API.startCooking(restaurantId, workerCardId, dishIdsToCook);
+          await API.startCooking(
+            restaurantId,
+            characterCardId,
+            characterId,
+            dishIdsToCook
+          );
         }
       } else {
-        // logger("not ready to cook");
+        logger("not ready to cook");
       }
     } else {
-      //   logger("restaurant is closed");
+      logger("restaurant is closed");
     }
   },
 
@@ -269,9 +280,9 @@ const restaurantManager = {
   },
 
   async init() {
-    logger("Script will start working in 10 seconds");
-    await Helper.sleep(10000);
-    logger("Restaurant manager initialized");
+    // logger("Script will start working in 10 seconds");
+    // await Helper.sleep(10000);
+    // logger("Restaurant manager initialized");
 
     while (true) {
       await this.manageRestaurants();

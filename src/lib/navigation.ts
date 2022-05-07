@@ -15,6 +15,7 @@ const navigation = {
 
   async openCookModal(characterId: string) {
     await this.myCharacters();
+
     const characterBtnList: HTMLElement[] = Array.from(
       document.querySelectorAll(".character-buttons")
     );
@@ -25,7 +26,7 @@ const navigation = {
 
     if (cookBtnByCharId) {
       (cookBtnByCharId as HTMLElement).click();
-      await Helper.sleep(1000);
+      await Helper.sleep(4000);
     }
   },
 

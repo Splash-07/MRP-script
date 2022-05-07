@@ -431,7 +431,7 @@ const navigation = {
         const cookBtnByCharId = (_a = characterBtnList.find((btnPair) => btnPair.children[1].href.includes(characterId))) === null || _a === void 0 ? void 0 : _a.children[0];
         if (cookBtnByCharId) {
             cookBtnByCharId.click();
-            await helper_1.default.sleep(1000);
+            await helper_1.default.sleep(4000);
         }
     },
     async closeModal() {

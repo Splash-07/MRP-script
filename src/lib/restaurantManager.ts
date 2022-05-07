@@ -280,13 +280,13 @@ const restaurantManager = {
   },
 
   async init() {
-    // logger("Script will start working in 10 seconds");
-    // await Helper.sleep(10000);
-    // logger("Restaurant manager initialized");
+    logger("Script will be initialized in 10 seconds");
+    await Helper.sleep(10000);
+    logger("Script initialized");
 
     while (true) {
       await this.manageRestaurants();
-      await Helper.sleep(120000);
+      await Helper.sleep(60000);
     }
   },
 };

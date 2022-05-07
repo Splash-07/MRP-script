@@ -29,6 +29,15 @@ const navigation = {
     }
   },
 
+  async closeModal() {
+    const closeModalBtn = document.querySelector(".modal-close")?.children[0];
+
+    if (closeModalBtn) {
+      (closeModalBtn as HTMLElement).click();
+      await Helper.sleep(1000);
+    }
+  },
+
   async handleMenuNavigation(domElement: Element | null) {
     if (!domElement) return;
 

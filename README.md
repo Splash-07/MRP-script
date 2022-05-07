@@ -1,6 +1,3 @@
-# ATTENTION!
-After the last update of the game (06.05.2022), the script stopped working. I am fixing.
-
 # [WIP] Medium Rare Potato restaurant management script
 
 QoL script made to manage your restaurant
@@ -45,4 +42,4 @@ You have two ways of using this user script:
 # DONATIONS AND CONTACTS
 
 - My discord - Shrixy#9453
-- Thanks for your support - ivrjw.wam 
+- Thanks for your support - ivrjw.wam

@@ -136,6 +136,7 @@ const API = {
       logger(`Started cooking`);
       console.log("Start cooking with response data:", resData);
       await Helper.sleep(5000);
+      await navigation.closeModal();
       await navigation.myCharacters();
     } catch (error: any) {
       logger(`${error.message}`);

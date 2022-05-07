@@ -29,10 +29,8 @@ const restaurantManager = {
                 const restaurant = myRestaurants[i];
                 restaurantDishesMap[restaurant.id] = restaurant.restaurant_dishes.map((dish) => dish.dish);
                 await this.handleRestaurantStatus(restaurant);
-                console.log("rest");
             }
         }
-        console.log("after restaurants");
         const myCharacters = await api_1.default.getCharacters();
         await helper_1.default.sleep(3000);
         if (myCharacters) {
@@ -325,6 +323,7 @@ const API = {
             (0, logger_1.default)(`Started cooking`);
             console.log("Start cooking with response data:", resData);
             await helper_1.default.sleep(5000);
+            await navigation_1.default.closeModal();
             await navigation_1.default.myCharacters();
         }
         catch (error) {
@@ -429,6 +428,14 @@ const navigation = {
         const cookBtnByCharId = (_a = characterBtnList.find((btnPair) => btnPair.children[1].href.includes(characterId))) === null || _a === void 0 ? void 0 : _a.children[0];
         if (cookBtnByCharId) {
             cookBtnByCharId.click();
+            await helper_1.default.sleep(1000);
+        }
+    },
+    async closeModal() {
+        var _a;
+        const closeModalBtn = (_a = document.querySelector(".modal-close")) === null || _a === void 0 ? void 0 : _a.children[0];
+        if (closeModalBtn) {
+            closeModalBtn.click();
             await helper_1.default.sleep(1000);
         }
     },

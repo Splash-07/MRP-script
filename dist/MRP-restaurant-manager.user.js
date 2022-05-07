@@ -2,7 +2,7 @@
                      // @name         Medium Rare Potato restaurant management script
                      // @description  Script made to manage your restaurant in https://game.medium-rare-potato.io/
                      // @namespace    https://github.com/Splash-07/MRP-script
-                     // @version      1.0.0
+                     // @version      1.1.1
                      // @author       Splash-07 (https://github.com/Splash-07)
                      // @match        https://game.medium-rare-potato.io/*
                      // ==/UserScript==
@@ -16,12 +16,12 @@
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const api_1 = __webpack_require__(2);
-const config_1 = __webpack_require__(4);
+const config_1 = __webpack_require__(6);
 const helper_1 = __webpack_require__(3);
+const logger_1 = __webpack_require__(4);
 const restaurantManager = {
     async manageRestaurants() {
         const myRestaurants = await api_1.default.getRestaurants();
-        const myCharacters = await api_1.default.getCharacters();
         const restaurantDishesMap = {};
         await helper_1.default.sleep(3000);
         if (myRestaurants) {
@@ -29,8 +29,11 @@ const restaurantManager = {
                 const restaurant = myRestaurants[i];
                 restaurantDishesMap[restaurant.id] = restaurant.restaurant_dishes.map((dish) => dish.dish);
                 await this.handleRestaurantStatus(restaurant);
+                console.log("rest");
             }
         }
+        console.log("after restaurants");
+        const myCharacters = await api_1.default.getCharacters();
         await helper_1.default.sleep(3000);
         if (myCharacters) {
             for (let i = 0; i < myCharacters.length; i++) {
@@ -46,8 +49,8 @@ const restaurantManager = {
             config_1.default.restaurant_working_hours_by_template_id[restaurant.atomichub_template_id]) *
             msInHour;
         const openTime = new Date(restaurant.end_work).getTime() + restaurantCD;
-        const isTimerIsOver = openTime <= currentTime;
-        if (!isTimerIsOver)
+        const isCDIsOver = openTime <= currentTime;
+        if (!isCDIsOver)
             return;
         await api_1.default.openRestaurant(restaurant.id);
     },
@@ -56,7 +59,8 @@ const restaurantManager = {
         if (!this.hasContract(character))
             return;
         const restaurantId = character.restaurant_worker_contracts[0].restaurant_id;
-        const workerCardId = character.card_id;
+        const characterCardId = character.card_id;
+        const characterId = character.id;
         const restaurantStartWork = new Date(character.restaurant_worker_contracts[0].restaurant_start_work).getTime();
         const restaurantEndWork = new Date(character.restaurant_worker_contracts[0].restaurant_end_work).getTime();
         const cookEnd = new Date(character.cook_end).getTime();
@@ -70,15 +74,15 @@ const restaurantManager = {
                 const characterDishCards = character.chef_dishes.map((card) => card.dish);
                 const dishIdsToCook = this.getDishIdsToCook(chefDishCards, restaurantDishCards, characterDishCards, helpersAccelerationRate);
                 if (dishIdsToCook) {
-                    await api_1.default.startCooking(restaurantId, workerCardId, dishIdsToCook);
+                    await api_1.default.startCooking(restaurantId, characterCardId, characterId, dishIdsToCook);
                 }
             }
             else {
-                console.log("not ready to cook");
+                (0, logger_1.default)("not ready to cook");
             }
         }
         else {
-            console.log("restaurant is closed");
+            (0, logger_1.default)("restaurant is closed");
         }
     },
     getDishIdsToCook(chefDishCards, restaurantDishCards, characterDishCards, helpersAccelerationRate) {
@@ -182,7 +186,7 @@ const restaurantManager = {
             n--;
             i--;
         }
-        console.log("debug array", debugArray);
+        console.log("Best dish combination", debugArray);
         return result;
     },
     findBestRatioDish(dishList) {
@@ -197,9 +201,6 @@ const restaurantManager = {
             character.restaurant_worker_contracts.length > 0);
     },
     async init() {
-        console.log("Script will start working in 10 seconds");
-        await helper_1.default.sleep(10000);
-        console.log("Restaurant manager initialized");
         while (true) {
             await this.manageRestaurants();
             await helper_1.default.sleep(120000);
@@ -216,7 +217,8 @@ exports["default"] = restaurantManager;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const helper_1 = __webpack_require__(3);
-const restaurantManager_1 = __webpack_require__(1);
+const logger_1 = __webpack_require__(4);
+const navigation_1 = __webpack_require__(5);
 const API = {
     getRestaurants: async () => {
         const params = {
@@ -235,17 +237,22 @@ const API = {
             headers: {
                 "api-key": JSON.parse(window.localStorage.getItem("user")).api_key,
                 Accept: "application/json, text/plain, */*",
+                Referer: "https://game.medium-rare-potato.io/restaurants",
             },
         };
         try {
             const res = await fetch(`/v1/user/restaurants/?${helper_1.default.queryParamsToString(params)}`, options);
             const resData = await res.json();
+            if (resData.status === "STATUS_FAILURE") {
+                console.log(resData);
+                throw new Error("Restaurant request failed");
+            }
             const restaurantList = resData.restaurant_list.results;
             console.log("restaurant:", restaurantList);
             return restaurantList;
         }
         catch (error) {
-            console.log(error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
     getCharacters: async () => {
@@ -259,12 +266,16 @@ const API = {
         try {
             const res = await fetch(`/v1/user/characters/`, options);
             const resData = await res.json();
+            if (resData.status === "STATUS_FAILURE") {
+                console.log(resData);
+                throw new Error("Character request failed");
+            }
             const characterList = resData.character_list.results;
             console.log("characters:", characterList);
             return characterList;
         }
         catch (error) {
-            console.log(error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
     getDishes: async () => {
@@ -278,15 +289,20 @@ const API = {
         try {
             const res = await fetch(`/v1/user/dishes/`, options);
             const resData = await res.json();
+            if (resData.status === "STATUS_FAILURE") {
+                console.log(resData);
+                throw new Error("Dish request failed");
+            }
             const dishesList = resData.dish_list.results;
             console.log("dishes:", dishesList);
             return dishesList;
         }
         catch (error) {
-            console.log(error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
-    startCooking: async (restaurantId, workerCardId, dishIds) => {
+    startCooking: async (restaurantId, characterCardId, characterId, dishIds) => {
+        await navigation_1.default.openCookModal(characterId);
         const options = {
             method: "post",
             headers: {
@@ -295,22 +311,28 @@ const API = {
                 Accept: "application/json, text/plain, */*",
             },
             body: JSON.stringify({
-                worker_card_id: workerCardId,
+                worker_card_id: characterCardId,
                 dish_ids: dishIds,
             }),
         };
         try {
             const res = await fetch(`/v1/restaurants/${restaurantId}/start-cook/`, options);
             const resData = await res.json();
-            console.log("Started cooking", resData);
+            if (resData.status === "STATUS_FAILURE") {
+                console.log(resData);
+                throw new Error("Start cooking request failed");
+            }
+            (0, logger_1.default)(`Started cooking`);
+            console.log("Start cooking with response data:", resData);
             await helper_1.default.sleep(5000);
-            await restaurantManager_1.default.manageRestaurants();
+            await navigation_1.default.myCharacters();
         }
         catch (error) {
-            console.log("Failed to start cooking", error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
     openRestaurant: async (restaurantId) => {
+        await navigation_1.default.myRestaurants();
         const options = {
             method: "post",
             headers: {
@@ -321,12 +343,17 @@ const API = {
         try {
             const res = await fetch(`/v1/user/restaurants/${restaurantId}/open/`, options);
             const resData = await res.json();
-            console.log("Restaurant has been opened", resData);
+            if (resData.status === "STATUS_FAILURE") {
+                console.log(resData);
+                throw new Error("Open restaurant request failed");
+            }
+            (0, logger_1.default)("Restaurant has been opened");
+            console.log("Open restaurant response data:", resData);
             await helper_1.default.sleep(5000);
-            await restaurantManager_1.default.manageRestaurants();
+            await navigation_1.default.myRestaurants();
         }
         catch (error) {
-            console.log("Failed to open restaurant", error);
+            (0, logger_1.default)(`${error.message}`);
         }
     },
 };
@@ -354,6 +381,69 @@ exports["default"] = Helper;
 
 /***/ }),
 /* 4 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const logger = (message) => {
+    const currentTime = new Date();
+    const timer = `${currentTime.getHours() >= 10
+        ? currentTime.getHours()
+        : currentTime.getHours() < 10 && currentTime.getHours() > 0
+            ? `0${currentTime.getHours()}`
+            : "00"}:${currentTime.getMinutes() >= 10
+        ? currentTime.getMinutes()
+        : currentTime.getMinutes() < 10 && currentTime.getMinutes() > 0
+            ? `0${currentTime.getMinutes()}`
+            : "00"}:${currentTime.getSeconds() >= 10
+        ? currentTime.getSeconds()
+        : currentTime.getSeconds() < 10 && currentTime.getSeconds() > 0
+            ? `0${currentTime.getSeconds()}`
+            : "00"}`;
+    const log = `[${timer}] ${message}`;
+    console.log(log);
+};
+exports["default"] = logger;
+
+
+/***/ }),
+/* 5 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const helper_1 = __webpack_require__(3);
+const navigation = {
+    async myRestaurants() {
+        const myRestaurants = document.querySelector('a[href="/restaurants"');
+        await this.handleMenuNavigation(myRestaurants);
+    },
+    async myCharacters() {
+        const myCharacters = document.querySelector('a[href="/characters"');
+        await this.handleMenuNavigation(myCharacters);
+    },
+    async openCookModal(characterId) {
+        var _a;
+        await this.myCharacters();
+        const characterBtnList = Array.from(document.querySelectorAll(".character-buttons"));
+        const cookBtnByCharId = (_a = characterBtnList.find((btnPair) => btnPair.children[1].href.includes(characterId))) === null || _a === void 0 ? void 0 : _a.children[0];
+        if (cookBtnByCharId) {
+            cookBtnByCharId.click();
+            await helper_1.default.sleep(1000);
+        }
+    },
+    async handleMenuNavigation(domElement) {
+        if (!domElement)
+            return;
+        domElement.click();
+        await helper_1.default.sleep(2000);
+    },
+};
+exports["default"] = navigation;
+
+
+/***/ }),
+/* 6 */
 /***/ ((__unused_webpack_module, exports) => {
 
 

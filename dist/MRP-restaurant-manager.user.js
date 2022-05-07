@@ -11,14 +11,60 @@
 /******/ 	var __webpack_modules__ = ([
 /* 0 */,
 /* 1 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Helper = {
+    queryParamsToString: (params) => {
+        return Object.keys(params)
+            .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+            .join("&");
+    },
+    sleep: async (ms) => {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+};
+exports["default"] = Helper;
+
+
+/***/ }),
+/* 2 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const logger = (message) => {
+    const currentTime = new Date();
+    const timer = `${currentTime.getHours() >= 10
+        ? currentTime.getHours()
+        : currentTime.getHours() < 10 && currentTime.getHours() > 0
+            ? `0${currentTime.getHours()}`
+            : "00"}:${currentTime.getMinutes() >= 10
+        ? currentTime.getMinutes()
+        : currentTime.getMinutes() < 10 && currentTime.getMinutes() > 0
+            ? `0${currentTime.getMinutes()}`
+            : "00"}:${currentTime.getSeconds() >= 10
+        ? currentTime.getSeconds()
+        : currentTime.getSeconds() < 10 && currentTime.getSeconds() > 0
+            ? `0${currentTime.getSeconds()}`
+            : "00"}`;
+    const log = `[${timer}] ${message}`;
+    console.log(log);
+};
+exports["default"] = logger;
+
+
+/***/ }),
+/* 3 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const api_1 = __webpack_require__(2);
+const api_1 = __webpack_require__(4);
 const config_1 = __webpack_require__(6);
-const helper_1 = __webpack_require__(3);
-const logger_1 = __webpack_require__(4);
+const helper_1 = __webpack_require__(1);
+const logger_1 = __webpack_require__(2);
 const restaurantManager = {
     async manageRestaurants() {
         const myRestaurants = await api_1.default.getRestaurants();
@@ -209,13 +255,13 @@ exports["default"] = restaurantManager;
 
 
 /***/ }),
-/* 2 */
+/* 4 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const helper_1 = __webpack_require__(3);
-const logger_1 = __webpack_require__(4);
+const helper_1 = __webpack_require__(1);
+const logger_1 = __webpack_require__(2);
 const navigation_1 = __webpack_require__(5);
 const API = {
     getRestaurants: async () => {
@@ -360,58 +406,12 @@ exports["default"] = API;
 
 
 /***/ }),
-/* 3 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const Helper = {
-    queryParamsToString: (params) => {
-        return Object.keys(params)
-            .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
-            .join("&");
-    },
-    sleep: async (ms) => {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-    },
-};
-exports["default"] = Helper;
-
-
-/***/ }),
-/* 4 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const logger = (message) => {
-    const currentTime = new Date();
-    const timer = `${currentTime.getHours() >= 10
-        ? currentTime.getHours()
-        : currentTime.getHours() < 10 && currentTime.getHours() > 0
-            ? `0${currentTime.getHours()}`
-            : "00"}:${currentTime.getMinutes() >= 10
-        ? currentTime.getMinutes()
-        : currentTime.getMinutes() < 10 && currentTime.getMinutes() > 0
-            ? `0${currentTime.getMinutes()}`
-            : "00"}:${currentTime.getSeconds() >= 10
-        ? currentTime.getSeconds()
-        : currentTime.getSeconds() < 10 && currentTime.getSeconds() > 0
-            ? `0${currentTime.getSeconds()}`
-            : "00"}`;
-    const log = `[${timer}] ${message}`;
-    console.log(log);
-};
-exports["default"] = logger;
-
-
-/***/ }),
 /* 5 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const helper_1 = __webpack_require__(3);
+const helper_1 = __webpack_require__(1);
 const navigation = {
     async myRestaurants() {
         const myRestaurants = document.querySelector('a[href="/restaurants"');
@@ -803,10 +803,18 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const restaurantManager_1 = __webpack_require__(1);
+const helper_1 = __webpack_require__(1);
+const logger_1 = __webpack_require__(2);
+const restaurantManager_1 = __webpack_require__(3);
 (async () => {
     console.clear();
-    await restaurantManager_1.default.init();
+    (0, logger_1.default)("Script will be initialized in 10 seconds");
+    await helper_1.default.sleep(10000);
+    (0, logger_1.default)("Script initialized");
+    while (true) {
+        await restaurantManager_1.default.init();
+        await helper_1.default.sleep(60000);
+    }
 })();
 
 })();

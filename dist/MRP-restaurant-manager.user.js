@@ -67,7 +67,7 @@ const restaurantManager = {
                 console.log("Best dish combination", dishCombination);
                 const dishIdsToCook = dishCombination.map((dish) => dish.dish_id);
                 if (dishIdsToCook) {
-                    await api_1.default.startCooking(restaurantId, characterCardId, characterId, dishIdsToCook);
+                    await api_1.default.startCooking(restaurantId, characterCardId, dishIdsToCook);
                 }
             }
             else {
@@ -82,7 +82,7 @@ const restaurantManager = {
         const myRestaurants = await api_1.default.getMyRestaurants();
         const myCharacters = await api_1.default.getMyCharacters();
         const listOfTimers = [];
-        const additionalTime = 50000;
+        const additionalTime = 70000;
         if (myRestaurants) {
             myRestaurants.forEach((restaurant) => {
                 const { currentTime, openTime } = this.getRestaurantTimerInfo(restaurant);
@@ -529,29 +529,6 @@ const API = {
             (0, logger_1.default)(`${error.message}`);
         }
     },
-    async getDishes() {
-        const options = {
-            method: "get",
-            headers: {
-                "api-key": JSON.parse(window.localStorage.getItem("user")).api_key,
-                Accept: "application/json, text/plain, */*",
-            },
-        };
-        try {
-            const res = await fetch(`/v1/user/dishes/`, options);
-            const resData = await res.json();
-            if (resData.status === "STATUS_FAILURE") {
-                console.log(resData);
-                throw new Error("Dish request failed");
-            }
-            const dishesList = resData.dish_list.results;
-            console.log("dishes:", dishesList);
-            return dishesList;
-        }
-        catch (error) {
-            (0, logger_1.default)(`${error.message}`);
-        }
-    },
     async setWorker(characterCardId, restaurantId) {
         const options = {
             method: "post",
@@ -569,11 +546,12 @@ const API = {
             const resData = await res.json();
             if (resData.status === "STATUS_FAILURE") {
                 console.log(resData);
-                throw new Error("Open restaurant request failed");
+                throw new Error("Set worker request failure");
             }
-            (0, logger_1.default)("Restaurant has been opened");
-            console.log("Open restaurant response data:", resData);
-            await helper_1.default.sleep(5000);
+            (0, logger_1.default)(`Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`);
+            console.log("Set worker response data:", resData);
+            console.log("Await 1 minute after contract signing, before continue");
+            await helper_1.default.sleep(60000);
         }
         catch (error) {
             (0, logger_1.default)(`${error.message}`);
@@ -601,7 +579,7 @@ const API = {
             (0, logger_1.default)(`${error.message}`);
         }
     },
-    async startCooking(restaurantId, characterCardId, characterId, dishIds) {
+    async startCooking(restaurantId, characterCardId, dishIds) {
         const options = {
             method: "post",
             headers: {
@@ -624,6 +602,7 @@ const API = {
             (0, logger_1.default)(`Started cooking`);
             console.log("Start cooking with response data:", resData);
             await helper_1.default.sleep(5000);
+            await navigation_1.default.closeModal();
             await navigation_1.default.myCharacters();
         }
         catch (error) {

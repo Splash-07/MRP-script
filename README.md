@@ -33,11 +33,9 @@ You have two ways of using this user script:
 
 # TODO
 
-1. Logger
-2. Filter dish pull by character rarity
-3. Using setInterval instead of while infinity loop, to decrease needles request to API to minimum
-4. Page reload (maybe)
-5. getMaxProfitableCombinationOfDishIds function optimization (maybe)
+1. Filter dish pull by character rarity
+2. Using setTimeout instead of while infinity loop, to decrease needles request to API to minimum
+3. getMaxProfitableCombinationOfDishIds function optimization (maybe)
 
 # DONATIONS AND CONTACTS
 

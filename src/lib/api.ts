@@ -1,12 +1,17 @@
-import { Restaurant } from "./../types/index";
-import { Character, Params } from "../types";
+import {
+  CharacterChef,
+  CharacterCook,
+  Restaurant,
+  Params,
+  DishPull,
+  RestaurantDishesToCook,
+} from "../types";
 import Helper from "./helper";
-import restaurantManager from "./restaurantManager";
 import logger from "./logger";
 import navigation from "./navigation";
 
 const API = {
-  getRestaurants: async () => {
+  async getMyRestaurants() {
     const params: Params = {
       search: "",
       fee: "",
@@ -41,14 +46,97 @@ const API = {
       }
 
       const restaurantList: Restaurant[] = resData.restaurant_list.results;
-      console.log("restaurant:", restaurantList);
+
       return restaurantList;
     } catch (error: any) {
       logger(`${error.message}`);
     }
   },
 
-  getCharacters: async () => {
+  async getDishesToCook(
+    restaurantId: string,
+    characterCardId: string,
+    characterId: string
+  ) {
+    await navigation.openCookModal(characterId);
+
+    const options = {
+      method: "POST",
+      headers: {
+        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
+        Accept: "application/json, text/plain, */*",
+        Referer: "https://game.medium-rare-potato.io/characters",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_card_id: characterCardId,
+      }),
+    };
+
+    try {
+      const res = await fetch(
+        `/v1/restaurants/${restaurantId}/dishes-to-cook/get-or-create/`,
+        options
+      );
+      const resData = await res.json();
+
+      if (resData.status === "STATUS_FAILURE") {
+        console.log(resData);
+        throw new Error("Get dishes to cook request failed");
+      }
+
+      const restaurantDishesToCook: RestaurantDishesToCook =
+        resData.restaurant_dishes_to_cook;
+
+      return restaurantDishesToCook;
+    } catch (error: any) {
+      logger(`${error.message}`);
+    }
+  },
+
+  async getOpenedRestaurants() {
+    const params: Params = {
+      search: "",
+      fee: "",
+      min_staff_rating: "",
+      rating: "",
+      sort: "",
+      rarity: "",
+      status: "RESTAURANT_STATUS_OPENED",
+      is_chef_exist: false,
+      is_free_slot_exist: true,
+    };
+
+    const options = {
+      method: "get",
+      headers: {
+        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
+        Accept: "application/json, text/plain, */*",
+        Referer: "https://game.medium-rare-potato.io/restaurants",
+      },
+    };
+
+    try {
+      const res = await fetch(
+        `/v1/restaurants/?${Helper.queryParamsToString(params)}`,
+        options
+      );
+      const resData = await res.json();
+
+      if (resData.status === "STATUS_FAILURE") {
+        console.log(resData);
+        throw new Error("Restaurant request failed");
+      }
+
+      const restaurantList: Restaurant[] = resData.restaurant_list.results;
+
+      return restaurantList;
+    } catch (error: any) {
+      logger(`${error.message}`);
+    }
+  },
+
+  async getMyCharacters() {
     const options = {
       method: "get",
       headers: {
@@ -66,15 +154,54 @@ const API = {
         throw new Error("Character request failed");
       }
 
-      const characterList: Character[] = resData.character_list.results;
-      console.log("characters:", characterList);
+      const characterList: (CharacterChef | CharacterCook)[] =
+        resData.character_list.results;
+
       return characterList;
     } catch (error: any) {
       logger(`${error.message}`);
     }
   },
 
-  getDishes: async () => {
+  async setWorker(characterCardId: string, restaurantId: string) {
+    // await navigation.myRestaurants();
+
+    const options = {
+      method: "post",
+      headers: {
+        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
+        Accept: "application/json, text/plain, */*",
+      },
+      body: JSON.stringify({
+        worker_card_id: characterCardId,
+        days_duration: 1,
+      }),
+    };
+
+    try {
+      const res = await fetch(
+        `/v1/restaurants/${restaurantId}/set-worker/`,
+        options
+      );
+      const resData = await res.json();
+
+      if (resData.status === "STATUS_FAILURE") {
+        console.log(resData);
+        throw new Error("Set worker request failure");
+      }
+
+      logger(
+        `Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`
+      );
+      console.log("Set worker response data:", resData);
+      console.log("Await 1 minute after contract signing, before continue");
+      await Helper.sleep(60000);
+    } catch (error: any) {
+      logger(`${error.message}`);
+    }
+  },
+
+  async getDishPullList() {
     const options = {
       method: "get",
       headers: {
@@ -84,30 +211,27 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/user/dishes/`, options);
+      const res = await fetch(`v1/dish-pool/`, options);
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
         console.log(resData);
-        throw new Error("Dish request failed");
+        throw new Error("Dish pull request failed");
       }
 
-      const dishesList = resData.dish_list.results;
-      console.log("dishes:", dishesList);
-      return dishesList;
+      const dishPullList: DishPull[] = resData.dish_pool;
+      // console.log("dishPullList:", dishPullList);
+      return dishPullList;
     } catch (error: any) {
       logger(`${error.message}`);
     }
   },
 
-  startCooking: async (
+  async startCooking(
     restaurantId: string,
     characterCardId: string,
-    characterId: string,
     dishIds: string[]
-  ) => {
-    await navigation.openCookModal(characterId);
-
+  ) {
     const options = {
       method: "post",
       headers: {
@@ -143,7 +267,7 @@ const API = {
     }
   },
 
-  openRestaurant: async (restaurantId: string) => {
+  async openRestaurant(restaurantId: string) {
     await navigation.myRestaurants();
 
     const options = {

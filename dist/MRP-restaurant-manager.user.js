@@ -50,18 +50,19 @@ const restaurantManager = {
         await api_1.default.openRestaurant(restaurant.id);
     },
     async handleCharacterStatus(character) {
-        const isCharacterResting = this.getCharacterTimerInfo(character).isCharacterResting;
-        if (isCharacterResting)
+        const { isRestaurantOpened, isCharacterCanStartCook, isCharacterResting } = this.getCharacterTimerInfo(character);
+        if ((0, typeguards_1.isCook)(character) && isCharacterResting)
             return;
         if ((0, typeguards_1.isCook)(character) &&
             !this.hasContract(character) &&
             settings_1.default.findContractForCookIsEnabled) {
             return await this.findAndSignContractForCharacter(character);
         }
+        if (!this.hasContract(character))
+            return;
         const characterCardId = character.card_id;
         const characterId = character.id;
         const restaurantId = character.restaurant_worker_contracts[0].restaurant_id;
-        const { isRestaurantOpened, isCharacterCanStartCook } = this.getCharacterTimerInfo(character);
         if (isRestaurantOpened) {
             if (isCharacterCanStartCook) {
                 const dishPullList = await api_1.default.getDishPullList();

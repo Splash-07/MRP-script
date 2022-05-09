@@ -55,9 +55,10 @@ const restaurantManager = {
   },
 
   async handleCharacterStatus(character: CharacterCook | CharacterChef) {
-    const isCharacterResting =
-      this.getCharacterTimerInfo(character).isCharacterResting;
-    if (isCharacterResting) return;
+    const { isRestaurantOpened, isCharacterCanStartCook, isCharacterResting } =
+      this.getCharacterTimerInfo(character);
+    // if char is cook and he is resting do nothing
+    if (isCook(character) && isCharacterResting) return;
     // If we have free cook, who is not resting at this moment -> sign contract for him
     if (
       isCook(character) &&
@@ -67,12 +68,12 @@ const restaurantManager = {
       return await this.findAndSignContractForCharacter(character);
     }
 
+    // if character still dont have contract do nothing
+    if (!this.hasContract(character)) return;
+
     const characterCardId = character.card_id;
     const characterId = character.id;
     const restaurantId = character.restaurant_worker_contracts[0].restaurant_id;
-
-    const { isRestaurantOpened, isCharacterCanStartCook } =
-      this.getCharacterTimerInfo(character);
 
     // If character has contract in opened restaurant
     if (isRestaurantOpened) {
@@ -300,10 +301,13 @@ const restaurantManager = {
       restaurantList,
       characterRarity
     );
+    // const filteredRestaurants: Restaurant[] = [];
+
     if (filteredRestaurants.length === 0)
       return logger(
         `Cant find suitable restaurant for cook(id: ${character.id}) (try manually)`
       );
+
     const restaurantBestDishCombinationList = filteredRestaurants.map(
       (restaurant) => {
         const fee = restaurant.fee;

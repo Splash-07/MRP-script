@@ -17,17 +17,15 @@ QoL script made to manage your restaurant
 2. Use trough tampermonkey. Install [Tampermonkey browser extension](https://www.tampermonkey.net/), open tampermonkey dashboard, copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in editor and save it
 
 - **COOK SETTINGS**
-1. By default, people themselves search for a restaurant and sign a chef, and then the script will start cooking (nothing needs to be changed in the script).
-2. For those who want the script to do everything (search for a restaurant, sign a chef, etc.), you need to change the value from **"false"** to **"true"**.
+1. By default, people themselves search for a restaurant and sign a cook, and then the script will start cooking (nothing needs to be changed in the script).
+2. For those who want the script to do everything (search for a restaurant, sign a cook, etc.), you need to change the value from **"false"** to **"true"**.
 To change settings options, you need to find (use ctrl+f) in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) the following object
 
 ```
-//if findContractForCookIsEnabled is true then, if cook don't have contract yet, will be fired find best restaurant algorithm
 const settings = {
     findContractForCookIsEnabled: false,
 };
 ```
-The restaurant search algorithm is listed in the **"Main algorithms workflow"** section
 
 # Workflow
 
@@ -47,14 +45,14 @@ The restaurant search algorithm is listed in the **"Main algorithms workflow"** 
 
 1. Add UI
 
-# Main algorithms workflow
+## Main algorithms workflow
 
 1.  getBestDishCombination()
 
     - Finding best profitable restaurant dish (dish with max profit per minute ratio)
     - Finding best chef dish (dish with max profit per minute ratio)
     - Combining them with all dishes, that character can cook
-    - Finding the best profitable combination of dishes, that accumulative cook time less or equal then 180 minutes (Using knapsack algorithm)
+    - Return the best profitable combination of dishes, that accumulative cook time less or equal then 180 minutes (Using knapsack algorithm)
 
 2.  findAndSignContractForCharacter()
 
@@ -63,12 +61,12 @@ The restaurant search algorithm is listed in the **"Main algorithms workflow"** 
     - For each filtered restaurant:
       - Firing getBestDishCombination()
       - Calculate total profit
-
-```
-    profit_for_all_dishes * (restaurant_fee/100) * restaurant_rarity_coefficient
-```
-
     - Return best variant by profit
+
+```
+    total_profit = profit_for_all_dishes * (restaurant_fee/100) * restaurant_rarity_coefficient
+```
+
 
 # DONATIONS AND CONTACTS
 

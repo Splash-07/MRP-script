@@ -10,7 +10,7 @@ QoL script made to manage your restaurant
 
 # Usage
 
-You have two ways of using this user script:
+- **You have two ways of using this user script:**
 
 1. Use trough Dev Tools. Open [MRP Game](https://game.medium-rare-potato.io), open browser Dev Tools (F12), copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in Dev Tool console and press Enter
 
@@ -19,7 +19,7 @@ You have two ways of using this user script:
 - **COOK SETTINGS**
 1. By default, people themselves search for a restaurant and sign a chef, and then the script will start cooking (nothing needs to be changed in the script).
 2. For those who want the script to do everything (search for a restaurant, sign a chef, etc.), you need to change the value from **"false"** to **"true"**.
-To change settings options, you need to find (use ctrl+f) in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) '' the following object
+To change settings options, you need to find (use ctrl+f) in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) the following object
 
 ```
 //if findContractForCookIsEnabled is true then, if cook don't have contract yet, will be fired find best restaurant algorithm
@@ -27,6 +27,7 @@ const settings = {
     findContractForCookIsEnabled: false,
 };
 ```
+The restaurant search algorithm is listed in the **"Main algorithms workflow"** section
 
 # Workflow
 
@@ -71,5 +72,6 @@ const settings = {
 
 # DONATIONS AND CONTACTS
 
-- My discord - Shrixy#9453
-- Thanks for your support - ivrjw.wam
+- My discord - **Shrixy#9453**
+- Thanks for your support - **ivrjw.wam**
+- Special thanks for providing NFT for tests - **retry_88#9056**

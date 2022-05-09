@@ -55,16 +55,11 @@ const restaurantManager = {
   },
 
   async handleCharacterStatus(character: CharacterCook | CharacterChef) {
-    const { isRestaurantOpened, isCharacterCanStartCook, isCharacterResting } =
-      this.getCharacterTimerInfo(character);
+    const { isRestaurantOpened, isCharacterCanStartCook, isCharacterResting } = this.getCharacterTimerInfo(character);
     // if char is cook and he is resting do nothing
     if (isCook(character) && isCharacterResting) return;
     // If we have free cook, who is not resting at this moment -> sign contract for him
-    if (
-      isCook(character) &&
-      !this.hasContract(character) &&
-      settings.findContractForCookIsEnabled
-    ) {
+    if (isCook(character) && !this.hasContract(character) && settings.findContractForCookIsEnabled) {
       return await this.findAndSignContractForCharacter(character);
     }
 
@@ -80,22 +75,11 @@ const restaurantManager = {
       // If character can cook
       if (isCharacterCanStartCook) {
         const dishPullList = await API.getDishPullList();
-        const dishesToCook = await API.getDishesToCook(
-          restaurantId,
-          character.card_id,
-          character.id
-        );
+        const dishesToCook = await API.getDishesToCook(restaurantId, character.card_id, character.id);
         if (!dishPullList) return logger("Cant fetch dishPull list");
-        if (!dishesToCook)
-          return logger(
-            `Cant fetch dishes to cook for ${character.name}(id: ${characterId})`
-          );
+        if (!dishesToCook) return logger(`Cant fetch dishes to cook for ${character.name}(id: ${characterId})`);
 
-        const dishCombination = this.getBestDishCombination(
-          dishesToCook,
-          dishPullList,
-          character
-        );
+        const dishCombination = this.getBestDishCombination(dishesToCook, dishPullList, character);
         console.log("Best dish combination", dishCombination);
 
         const dishIdsToCook = dishCombination.map((dish) => dish.dish_id);
@@ -103,9 +87,7 @@ const restaurantManager = {
           await API.startCooking(restaurantId, characterCardId, dishIdsToCook);
         }
       } else {
-        logger(
-          `${character.name}(id:${character.card_id}) already cooking atm`
-        );
+        logger(`${character.name}(id:${character.card_id}) already cooking atm`);
       }
     } else {
       logger(
@@ -122,8 +104,7 @@ const restaurantManager = {
     const additionalTime = 70000; // idk where im loosing ~40 sec when trying to calculate character timer
     if (myRestaurants) {
       myRestaurants.forEach((restaurant) => {
-        const { currentTime, openTime } =
-          this.getRestaurantTimerInfo(restaurant);
+        const { currentTime, openTime } = this.getRestaurantTimerInfo(restaurant);
 
         const timer = openTime - currentTime + additionalTime;
         listOfTimers.push(timer);
@@ -132,22 +113,25 @@ const restaurantManager = {
 
     if (myCharacters) {
       myCharacters.forEach((character) => {
-        const {
-          cookEnd,
-          restEnd,
-          currentTime,
-          isRestaurantOpened,
-          isCharacterResting,
-        } = this.getCharacterTimerInfo(character);
+        const { cookEnd, restEnd, currentTime, isRestaurantOpened, isCharacterResting } =
+          this.getCharacterTimerInfo(character);
 
         if (this.hasContract(character) && isRestaurantOpened) {
           const timer = cookEnd - currentTime + additionalTime;
           listOfTimers.push(timer);
         }
 
-        if (isCook(character) && isCharacterResting) {
-          const timer = restEnd - currentTime + additionalTime;
-          listOfTimers.push(timer);
+        if (isCook(character)) {
+          if (isCharacterResting) {
+            const timer = restEnd - currentTime + additionalTime;
+            listOfTimers.push(timer);
+          }
+
+          if (!isCharacterResting && !this.hasContract(character)) {
+            // if cant find suitable restaurant, do it again in 2 minutes
+            const timer = 120000;
+            listOfTimers.push(timer);
+          }
         }
       });
     }
@@ -159,16 +143,10 @@ const restaurantManager = {
   getRestaurantTimerInfo(restaurant: Restaurant): RestaurantTimerInfo {
     const currentTime = Date.now();
     const msInHour = 3600000; // 1 hour
-    const restaurantCD =
-      (24 -
-        config.restaurant_working_hours_by_template_id[
-          restaurant.atomichub_template_id
-        ]) *
-      msInHour;
+    const restaurantCD = (24 - config.restaurant_working_hours_by_template_id[restaurant.atomichub_template_id]) * msInHour;
     const openTime = new Date(restaurant.end_work).getTime() + restaurantCD;
 
-    const timeSinceOpening =
-      currentTime - new Date(restaurant.start_work).getTime();
+    const timeSinceOpening = currentTime - new Date(restaurant.start_work).getTime();
 
     return {
       openTime,
@@ -178,20 +156,17 @@ const restaurantManager = {
   },
 
   getCharacterTimerInfo(character: Character): CharacterTimerInfo {
-    const restaurantStartWork = new Date(
-      character.restaurant_worker_contracts[0]?.restaurant_start_work
-    ).getTime();
-    const restaurantEndWork = new Date(
-      character.restaurant_worker_contracts[0]?.restaurant_end_work
-    ).getTime();
+    const restaurantStartWork = new Date(character.restaurant_worker_contracts[0]?.restaurant_start_work).getTime();
+    const restaurantEndWork = new Date(character.restaurant_worker_contracts[0]?.restaurant_end_work).getTime();
+    const characterWorkEnd = new Date(character.work_end).getTime();
     const cookEnd = new Date(character.cook_end).getTime();
     const restEnd = new Date(character.rest_end).getTime();
     const currentTime = Date.now();
 
-    const isRestaurantOpened =
-      currentTime > restaurantStartWork && currentTime < restaurantEndWork;
+    const isRestaurantOpened = currentTime > restaurantStartWork && currentTime < restaurantEndWork;
     const isCharacterCanStartCook = currentTime > cookEnd;
-    const isCharacterResting = currentTime < restEnd;
+    const isWorkHasEnded = currentTime > characterWorkEnd;
+    const isCharacterResting = isWorkHasEnded && currentTime < restEnd;
     return {
       cookEnd,
       restEnd,
@@ -204,9 +179,7 @@ const restaurantManager = {
 
   getHelpersAccelerationRate(helpers: Card[]): number {
     if (helpers.length < 1) return 0;
-    const helpersValues = helpers.map(
-      (helperObj) => config.helper_speed_up[helperObj.atomichub_template_id]
-    );
+    const helpersValues = helpers.map((helperObj) => config.helper_speed_up[helperObj.atomichub_template_id]);
     const coefficients: number[] = [];
 
     let i = 0;
@@ -222,17 +195,10 @@ const restaurantManager = {
       i++;
     }
 
-    return helpersValues.reduce(
-      (acc, cur, index) => (acc += cur * coefficients[index]),
-      0
-    );
+    return helpersValues.reduce((acc, cur, index) => (acc += cur * coefficients[index]), 0);
   },
 
-  getDishInfo(
-    dish: DishToCook | Card,
-    helpersAccelerationRate: number,
-    dishPullList: DishPull[]
-  ): Dish {
+  getDishInfo(dish: DishToCook | Card, helpersAccelerationRate: number, dishPullList: DishPull[]): Dish {
     const coefficient: Coefficients = {
       1: 1,
       2: 1.6,
@@ -241,14 +207,9 @@ const restaurantManager = {
       5: 7.6,
     };
 
-    const templateId =
-      "dish_atomichub_template_id" in dish
-        ? dish.dish_atomichub_template_id
-        : dish.atomichub_template_id;
+    const templateId = "dish_atomichub_template_id" in dish ? dish.dish_atomichub_template_id : dish.atomichub_template_id;
     const id = "dish_id" in dish ? dish.dish_id : dish.id;
-    const dishPullCount = dishPullList.find(
-      (dishPull) => dishPull.atomichub_template_id === templateId
-    )?.cooked_count;
+    const dishPullCount = dishPullList.find((dishPull) => dishPull.atomichub_template_id === templateId)?.cooked_count;
 
     const dishPullCoefficient = this.getDishPullCountCoefficient(dishPullCount);
 
@@ -257,8 +218,7 @@ const restaurantManager = {
 
     const rarityCoefficient = coefficient[rarity];
 
-    const acceleratedTime =
-      cookTime - cookTime * (helpersAccelerationRate / 100);
+    const acceleratedTime = cookTime - cookTime * (helpersAccelerationRate / 100);
     const profit = (cookTime / 10) * rarityCoefficient * dishPullCoefficient;
 
     return {
@@ -270,11 +230,7 @@ const restaurantManager = {
   },
 
   // wutafack is this
-  async findOpenedRestaurants(
-    restaurantList: Restaurant[] = [],
-    nextPage?: string
-  ): Promise<Restaurant[]> {
-    // dont look at me please
+  async findOpenedRestaurants(restaurantList: Restaurant[] = [], nextPage?: string): Promise<Restaurant[]> {
     const resData = await API.getOpenedRestaurants(nextPage);
     const { results, next } = resData?.restaurant_list!;
 
@@ -294,92 +250,58 @@ const restaurantManager = {
     if (!restaurantList) return logger("Failed to find restaurants to choose");
     if (!dishPullList) return logger("Cant fetch dishPullList");
 
-    const characterRarity =
-      config.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
+    const characterRarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
 
-    const filteredRestaurants = this.filterRestaurantsByTimeAndRarity(
-      restaurantList,
-      characterRarity
-    );
-    // const filteredRestaurants: Restaurant[] = [];
+    const filteredRestaurants = this.filterRestaurantsByTimeAndRarity(restaurantList, characterRarity);
 
     if (filteredRestaurants.length === 0)
-      return logger(
-        `Cant find suitable restaurant for cook(id: ${character.id}) (try manually)`
+      return logger(`Cant find suitable restaurant for cook(id: ${character.id}) (try manually)`);
+
+    const restaurantBestDishCombinationList = filteredRestaurants.map((restaurant) => {
+      const fee = restaurant.fee;
+      const restaurantRarityCoefficient = this.getRestaurantCoefficientByRarity(restaurant.atomichub_template_id);
+
+      const dishesToCook: RestaurantDishesToCook = {
+        chef_dishes: restaurant.chefs_dishes?.map((dish) => dish.dish) ?? [],
+        next_dishes_to_cook_update: "none",
+        restaurant_dishes: restaurant.restaurant_dishes?.map((dish) => dish.dish) ?? [],
+        worker_dishes: character.cook_dishes.map((dish) => dish.dish) ?? [],
+      };
+
+      const dishCombination = this.getBestDishCombination(dishesToCook, dishPullList, character);
+      return dishCombination.reduce(
+        (acc, cur) => {
+          return {
+            ...acc,
+            profit: acc.profit + (cur.profit - cur.profit * (fee / 100)) * restaurantRarityCoefficient,
+            time: acc.time + cur.time,
+          };
+        },
+        {
+          profit: 0,
+          time: 0,
+          restaurantId: restaurant.id,
+          wasOpenedIn: restaurant.start_work,
+        }
       );
+    });
 
-    const restaurantBestDishCombinationList = filteredRestaurants.map(
-      (restaurant) => {
-        const fee = restaurant.fee;
-        const restaurantRarityCoefficient =
-          this.getRestaurantCoefficientByRarity(
-            restaurant.atomichub_template_id
-          );
-
-        const dishesToCook: RestaurantDishesToCook = {
-          chef_dishes: restaurant.chefs_dishes?.map((dish) => dish.dish) ?? [],
-          next_dishes_to_cook_update: "none",
-          restaurant_dishes:
-            restaurant.restaurant_dishes?.map((dish) => dish.dish) ?? [],
-          worker_dishes: character.cook_dishes.map((dish) => dish.dish) ?? [],
-        };
-
-        const dishCombination = this.getBestDishCombination(
-          dishesToCook,
-          dishPullList,
-          character
-        );
-        return dishCombination.reduce(
-          (acc, cur) => {
-            return {
-              ...acc,
-              profit:
-                acc.profit +
-                (cur.profit - cur.profit * (fee / 100)) *
-                  restaurantRarityCoefficient,
-              time: acc.time + cur.time,
-            };
-          },
-          {
-            profit: 0,
-            time: 0,
-            restaurantId: restaurant.id,
-            wasOpenedIn: restaurant.start_work,
-          }
-        );
-      }
-    );
-
-    const bestRestaurant = restaurantBestDishCombinationList.reduce(
-      (prev, cur) => (cur.profit > prev.profit ? cur : prev)
-    );
+    const bestRestaurant = restaurantBestDishCombinationList.reduce((prev, cur) => (cur.profit > prev.profit ? cur : prev));
     return bestRestaurant.restaurantId;
   },
 
-  filterRestaurantsByTimeAndRarity(
-    restaurantList: Restaurant[],
-    rarity: number
-  ) {
+  filterRestaurantsByTimeAndRarity(restaurantList: Restaurant[], rarity: number) {
     const filteredList = restaurantList.filter((restaurant) => {
       const threeHours = 10080000; // 2.8 hour
-      const timeSinceOpening =
-        this.getRestaurantTimerInfo(restaurant).timeSinceOpening;
+      const timeSinceOpening = this.getRestaurantTimerInfo(restaurant).timeSinceOpening;
       // timSinceOpening must be < 3 hours
       if (timeSinceOpening < threeHours) {
-        const hasSuitableRestaurantDish = restaurant.restaurant_dishes?.find(
-          (dish) => {
-            const dishRarity =
-              config.RARITY_LEVELS_BY_TEMPLATE_ID[
-                dish.dish.atomichub_template_id
-              ];
-            return dishRarity <= rarity;
-          }
-        );
+        const hasSuitableRestaurantDish = restaurant.restaurant_dishes?.find((dish) => {
+          const dishRarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[dish.dish.atomichub_template_id];
+          return dishRarity <= rarity;
+        });
         const hasSuitableChefDish = restaurant.chefs_dishes?.find((dish) => {
-          const dishRarity =
-            config.RARITY_LEVELS_BY_TEMPLATE_ID[
-              dish.dish.atomichub_template_id
-            ];
+          const dishRarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[dish.dish.atomichub_template_id];
           return dishRarity <= rarity;
         });
 
@@ -400,10 +322,7 @@ const restaurantManager = {
   },
 
   // knapsack algorithm
-  getMaxProfitableCombinationOfDish(
-    dishArray: Dish[],
-    maxTime: number
-  ): Dish[] {
+  getMaxProfitableCombinationOfDish(dishArray: Dish[], maxTime: number): Dish[] {
     // Array of dishes object, with following properties:
     // 1 - cook time
     // 2 - profit from dish
@@ -481,10 +400,7 @@ const restaurantManager = {
     );
 
     const maxTime = 180;
-    const dishCombination = this.getMaxProfitableCombinationOfDish(
-      dishList,
-      maxTime
-    );
+    const dishCombination = this.getMaxProfitableCombinationOfDish(dishList, maxTime);
     return dishCombination;
   },
 
@@ -501,39 +417,24 @@ const restaurantManager = {
     const helpersAccelerationRate = this.getHelpersAccelerationRate(helpers);
 
     // restaurant dishes
-    const filteredRestaurantDishCardList = this.filterAvailableDishCards(
-      character,
-      restaurantDishCards
-    );
+    const filteredRestaurantDishCardList = this.filterAvailableDishCards(character, restaurantDishCards);
     const restaurantDishes = filteredRestaurantDishCardList.map((card) =>
       this.getDishInfo(card, helpersAccelerationRate, dishPullList)
     );
     const bestRestaurantDish = this.findBestRatioDish(restaurantDishes) ?? [];
 
     // chef dishes
-    const filteredChefDishCardList = this.filterAvailableDishCards(
-      character,
-      chefDishCards
-    );
-    const chefDishes = filteredChefDishCardList.map((card) =>
-      this.getDishInfo(card, helpersAccelerationRate, dishPullList)
-    );
+    const filteredChefDishCardList = this.filterAvailableDishCards(character, chefDishCards);
+    const chefDishes = filteredChefDishCardList.map((card) => this.getDishInfo(card, helpersAccelerationRate, dishPullList));
     const bestChefDish = this.findBestRatioDish(chefDishes) ?? [];
 
     // character dishes
-    const filteredCharacterDishCardList = this.filterAvailableDishCards(
-      character,
-      characterDishCards
-    );
+    const filteredCharacterDishCardList = this.filterAvailableDishCards(character, characterDishCards);
     const characterDishes = filteredCharacterDishCardList.map((card) =>
       this.getDishInfo(card, helpersAccelerationRate, dishPullList)
     );
 
-    const dishList = [
-      ...characterDishes,
-      ...bestRestaurantDish,
-      ...bestChefDish,
-    ];
+    const dishList = [...characterDishes, ...bestRestaurantDish, ...bestChefDish];
     return dishList;
   },
 
@@ -553,38 +454,25 @@ const restaurantManager = {
   getDishPullCountCoefficient(dishPullCount: number | undefined): number {
     if (!dishPullCount) return 1;
 
-    return dishPullCount < 378
-      ? 1.1
-      : dishPullCount >= 378 && dishPullCount < 756
-      ? 1.08
-      : 1.06;
+    return dishPullCount < 378 ? 1.1 : dishPullCount >= 378 && dishPullCount < 756 ? 1.08 : 1.06;
   },
 
   findBestRatioDish(dishList: Dish[]): [Dish] | [] {
     if (dishList.length < 1) return [];
 
-    const dish = dishList.reduce((prev, cur) =>
-      cur.profit / cur.time > prev.profit / prev.time ? cur : prev
-    );
+    const dish = dishList.reduce((prev, cur) => (cur.profit / cur.time > prev.profit / prev.time ? cur : prev));
     return [dish];
   },
 
-  filterAvailableDishCards(
-    character: Character,
-    dishCardList: (DishToCook | Card)[]
-  ) {
+  filterAvailableDishCards(character: Character, dishCardList: (DishToCook | Card)[]) {
     if (character.card_type === config.card_types.CARD_TYPE_CHEF) {
       return dishCardList;
     }
     // cook logic
-    const characterRarity =
-      config.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
+    const characterRarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
 
     const filteredDishCardList = dishCardList.filter((dish) => {
-      const templateId =
-        "dish_atomichub_template_id" in dish
-          ? dish.dish_atomichub_template_id
-          : dish.atomichub_template_id;
+      const templateId = "dish_atomichub_template_id" in dish ? dish.dish_atomichub_template_id : dish.atomichub_template_id;
       const dishRarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
       return characterRarity >= dishRarity;
     });
@@ -593,10 +481,7 @@ const restaurantManager = {
   },
 
   hasContract(character: Character): boolean {
-    return (
-      character.restaurant_worker_contracts &&
-      character.restaurant_worker_contracts.length > 0
-    );
+    return character.restaurant_worker_contracts && character.restaurant_worker_contracts.length > 0;
   },
 
   async init() {
@@ -608,7 +493,7 @@ const restaurantManager = {
     while (true) {
       sleepTimer = await this.manageRestaurants();
       if (sleepTimer < 0) {
-        sleepTimer = 15000;
+        sleepTimer = 30000;
       }
       logger(`Next action will be performed in ${Helper.msToTime(sleepTimer)}`);
       await Helper.sleep(sleepTimer);

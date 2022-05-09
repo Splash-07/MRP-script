@@ -16,9 +16,7 @@ const navigation = {
   async openCookModal(characterId: string) {
     await this.myCharacters();
 
-    const characterBtnList: HTMLElement[] = Array.from(
-      document.querySelectorAll(".character-buttons")
-    );
+    const characterBtnList: HTMLElement[] = Array.from(document.querySelectorAll(".character-buttons"));
 
     const cookBtnByCharId = characterBtnList.find((btnPair) =>
       (btnPair.children[1] as HTMLAnchorElement).href.includes(characterId)

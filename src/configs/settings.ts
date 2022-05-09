@@ -1,6 +1,6 @@
 import { SettingsConfig } from "../types";
 
 const settings: SettingsConfig = {
-  findContractForCookIsEnabled: false,
+  findContractForCookIsEnabled: true,
 };
 export default settings;

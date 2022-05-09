@@ -3,9 +3,7 @@ import { Params } from "../types";
 const Helper = {
   queryParamsToString: (params: Params): string => {
     return Object.keys(params)
-      .map(
-        (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-      )
+      .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
       .join("&");
   },
 
@@ -20,21 +18,9 @@ const Helper = {
     seconds = seconds % 3600;
     const minutes = Math.floor(seconds / 60);
     seconds = Math.floor(seconds % 60);
-    return `${
-      hours >= 10 ? hours : hours < 10 && hours > 0 ? `0${hours}` : "00"
-    }:${
-      minutes >= 10
-        ? minutes
-        : minutes < 10 && minutes > 0
-        ? `0${minutes}`
-        : "00"
-    }:${
-      seconds >= 10
-        ? seconds
-        : seconds < 10 && seconds > 0
-        ? `0${seconds}`
-        : "00"
-    }`;
+    return `${hours >= 10 ? hours : hours < 10 && hours > 0 ? `0${hours}` : "00"}:${
+      minutes >= 10 ? minutes : minutes < 10 && minutes > 0 ? `0${minutes}` : "00"
+    }:${seconds >= 10 ? seconds : seconds < 10 && seconds > 0 ? `0${seconds}` : "00"}`;
   },
 };
 

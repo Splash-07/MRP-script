@@ -6,15 +6,19 @@ QoL script made to manage your restaurant
 
 - Currently tested only for one restaurant with chef and one cook
 - You have to be logged in and verified on [MRP Game](https://game.medium-rare-potato.io) before using this script
-- Between all action there was added 1 minute delay, because character data returned from server, is not correct at times
+- Between all action there was added 1 minute delay, because character data returned from server is not correct at times
 
 # Usage
 
 You have two ways of using this user script:
 
 1. Use trough Dev Tools. Open [MRP Game](https://game.medium-rare-potato.io), open browser Dev Tools (F12), copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in Dev Tool console and press Enter
+
 2. Use trough tampermonkey. Install [Tampermonkey browser extension](https://www.tampermonkey.net/), open tampermonkey dashboard, copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in editor and save it
 
+- **COOK SETTINGS**
+1. By default, people themselves search for a restaurant and sign a chef, and then the script will start cooking (nothing needs to be changed in the script).
+2. For those who want the script to do everything (search for a restaurant, sign a chef, etc.), you need to change the value from **"false"** to **"true"**.
 To change settings options, you need to find (use ctrl+f) in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) '' the following object
 
 ```
@@ -40,14 +44,9 @@ const settings = {
 
 # TODO
 
-~~1. Handle cooks~~
-~~2. Filter dish pull by character rarity~~
-~~3. Using setTimeout instead of while infinity loop, to decrease needles request to API to minimum~~
-~~4. getMaxProfitableCombinationOfDishIds function optimization (maybe)~~
-
 1. Add UI
 
-#Main algorithms workflow
+# Main algorithms workflow
 
 1.  getBestDishCombination()
 
@@ -57,6 +56,7 @@ const settings = {
     - Finding the best profitable combination of dishes, that accumulative cook time less or equal then 180 minutes (Using knapsack algorithm)
 
 2.  findAndSignContractForCharacter()
+
     - Recursively find opened restaurants with free slots
     - Filter them by time (no more than three hours should pass from the moment of opening) and character rarity (restaurant must have 1 restaurant_dish or chef_dish with rarity equal or less than cook's rarity)
     - For each filtered restaurant:

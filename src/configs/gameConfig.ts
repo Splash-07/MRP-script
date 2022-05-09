@@ -1,6 +1,6 @@
 import { Config } from "../types";
 
-const rawConfig = {
+const gameConfig = {
   rarities: [
     "RARITY_RAW",
     "RARITY_RARE",
@@ -310,9 +310,6 @@ const rawConfig = {
   },
   WITHDRAW_FEE_DAYS_COUNT: 20,
 };
-
-export type RawConfig = typeof rawConfig;
-
-const config: Config = rawConfig;
-
+export type GameConfig = typeof gameConfig;
+const config: Config = gameConfig;
 export default config;

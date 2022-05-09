@@ -1,4 +1,4 @@
-import { RawConfig } from "../lib/config";
+import { GameConfig } from "../configs/gameConfig";
 
 export interface Params {
   [key: string]: string | boolean;
@@ -60,8 +60,10 @@ export interface RestaurantDishesToCook {
 export interface CharacterTimerInfo {
   cookEnd: number;
   currentTime: number;
+  restEnd: number;
   isRestaurantOpened: boolean;
   isCharacterCanStartCook: boolean;
+  isCharacterResting: boolean;
 }
 
 export interface RestaurantContract {
@@ -155,6 +157,10 @@ export interface CharacterResponse {
   status: string;
 }
 
+export interface SettingsConfig {
+  findContractForCookIsEnabled: boolean;
+}
+
 export interface RestaurantResponse {
   restaurant_list: {
     count: number;
@@ -171,7 +177,7 @@ export interface HelperCard {
 
 export interface Config
   extends Omit<
-    RawConfig,
+    GameConfig,
     | "helper_speed_up"
     | "dishes_time_to_cook"
     | "dish_slots_by_template_id"

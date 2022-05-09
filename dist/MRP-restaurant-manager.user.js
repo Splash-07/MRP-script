@@ -17,9 +17,10 @@
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const typeguards_1 = __webpack_require__(2);
 const api_1 = __webpack_require__(3);
-const config_1 = __webpack_require__(7);
+const gameConfig_1 = __webpack_require__(7);
 const helper_1 = __webpack_require__(4);
 const logger_1 = __webpack_require__(5);
+const settings_1 = __webpack_require__(8);
 const restaurantManager = {
     async manageRestaurants() {
         const myRestaurants = await api_1.default.getMyRestaurants();
@@ -49,8 +50,14 @@ const restaurantManager = {
         await api_1.default.openRestaurant(restaurant.id);
     },
     async handleCharacterStatus(character) {
-        if (!this.hasContract(character) && (0, typeguards_1.isCook)(character))
-            return await this.signContractForCharacter(character);
+        const isCharacterResting = this.getCharacterTimerInfo(character).isCharacterResting;
+        if (isCharacterResting)
+            return;
+        if ((0, typeguards_1.isCook)(character) &&
+            !this.hasContract(character) &&
+            settings_1.default.findContractForCookIsEnabled) {
+            return await this.findAndSignContractForCharacter(character);
+        }
         const characterCardId = character.card_id;
         const characterId = character.id;
         const restaurantId = character.restaurant_worker_contracts[0].restaurant_id;
@@ -92,15 +99,18 @@ const restaurantManager = {
         }
         if (myCharacters) {
             myCharacters.forEach((character) => {
-                if (this.hasContract(character)) {
-                    const { cookEnd, currentTime, isRestaurantOpened } = this.getCharacterTimerInfo(character);
-                    if (isRestaurantOpened) {
-                        const timer = cookEnd - currentTime + additionalTime;
-                        listOfTimers.push(timer);
-                    }
+                const { cookEnd, restEnd, currentTime, isRestaurantOpened, isCharacterResting, } = this.getCharacterTimerInfo(character);
+                if (this.hasContract(character) && isRestaurantOpened) {
+                    const timer = cookEnd - currentTime + additionalTime;
+                    listOfTimers.push(timer);
+                }
+                if ((0, typeguards_1.isCook)(character) && isCharacterResting) {
+                    const timer = restEnd - currentTime + additionalTime;
+                    listOfTimers.push(timer);
                 }
             });
         }
+        console.log(listOfTimers.map((timer) => helper_1.default.msToTime(timer)));
         const timeToNextAction = Math.min(...listOfTimers);
         return timeToNextAction;
     },
@@ -108,7 +118,7 @@ const restaurantManager = {
         const currentTime = Date.now();
         const msInHour = 3600000;
         const restaurantCD = (24 -
-            config_1.default.restaurant_working_hours_by_template_id[restaurant.atomichub_template_id]) *
+            gameConfig_1.default.restaurant_working_hours_by_template_id[restaurant.atomichub_template_id]) *
             msInHour;
         const openTime = new Date(restaurant.end_work).getTime() + restaurantCD;
         const timeSinceOpening = currentTime - new Date(restaurant.start_work).getTime();
@@ -119,23 +129,28 @@ const restaurantManager = {
         };
     },
     getCharacterTimerInfo(character) {
-        const restaurantStartWork = new Date(character.restaurant_worker_contracts[0].restaurant_start_work).getTime();
-        const restaurantEndWork = new Date(character.restaurant_worker_contracts[0].restaurant_end_work).getTime();
+        var _a, _b;
+        const restaurantStartWork = new Date((_a = character.restaurant_worker_contracts[0]) === null || _a === void 0 ? void 0 : _a.restaurant_start_work).getTime();
+        const restaurantEndWork = new Date((_b = character.restaurant_worker_contracts[0]) === null || _b === void 0 ? void 0 : _b.restaurant_end_work).getTime();
         const cookEnd = new Date(character.cook_end).getTime();
+        const restEnd = new Date(character.rest_end).getTime();
         const currentTime = Date.now();
         const isRestaurantOpened = currentTime > restaurantStartWork && currentTime < restaurantEndWork;
         const isCharacterCanStartCook = currentTime > cookEnd;
+        const isCharacterResting = currentTime < restEnd;
         return {
             cookEnd,
+            restEnd,
             currentTime,
             isRestaurantOpened,
             isCharacterCanStartCook,
+            isCharacterResting,
         };
     },
     getHelpersAccelerationRate(helpers) {
         if (helpers.length < 1)
             return 0;
-        const helpersValues = helpers.map((helperObj) => config_1.default.helper_speed_up[helperObj.atomichub_template_id]);
+        const helpersValues = helpers.map((helperObj) => gameConfig_1.default.helper_speed_up[helperObj.atomichub_template_id]);
         const coefficients = [];
         let i = 0;
         while (i < helpersValues.length) {
@@ -166,8 +181,8 @@ const restaurantManager = {
         const id = "dish_id" in dish ? dish.dish_id : dish.id;
         const dishPullCount = (_a = dishPullList.find((dishPull) => dishPull.atomichub_template_id === templateId)) === null || _a === void 0 ? void 0 : _a.cooked_count;
         const dishPullCoefficient = this.getDishPullCountCoefficient(dishPullCount);
-        const rarity = config_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
-        const cookTime = config_1.default.dishes_time_to_cook[templateId];
+        const rarity = gameConfig_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
+        const cookTime = gameConfig_1.default.dishes_time_to_cook[templateId];
         const rarityCoefficient = coefficient[rarity];
         const acceleratedTime = cookTime - cookTime * (helpersAccelerationRate / 100);
         const profit = (cookTime / 10) * rarityCoefficient * dishPullCoefficient;
@@ -178,14 +193,24 @@ const restaurantManager = {
             time: acceleratedTime,
         };
     },
+    async findOpenedRestaurants(restaurantList = [], nextPage) {
+        const resData = await api_1.default.getOpenedRestaurants(nextPage);
+        const { results, next } = resData === null || resData === void 0 ? void 0 : resData.restaurant_list;
+        restaurantList = [...restaurantList, ...results];
+        if (!next) {
+            return restaurantList;
+        }
+        await helper_1.default.sleep(2000);
+        return await this.findOpenedRestaurants(restaurantList, next);
+    },
     async findSuitableRestaurantId(character) {
-        const restaurantList = await api_1.default.getOpenedRestaurants();
+        const restaurantList = await this.findOpenedRestaurants();
         const dishPullList = await api_1.default.getDishPullList();
         if (!restaurantList)
             return (0, logger_1.default)("Failed to find restaurants to choose");
         if (!dishPullList)
             return (0, logger_1.default)("Cant fetch dishPullList");
-        const characterRarity = config_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
+        const characterRarity = gameConfig_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
         const filteredRestaurants = this.filterRestaurantsByTimeAndRarity(restaurantList, characterRarity);
         if (filteredRestaurants.length === 0)
             return (0, logger_1.default)(`Cant find suitable restaurant for cook(id: ${character.id}) (try manually)`);
@@ -216,7 +241,6 @@ const restaurantManager = {
             });
         });
         const bestRestaurant = restaurantBestDishCombinationList.reduce((prev, cur) => (cur.profit > prev.profit ? cur : prev));
-        console.log(bestRestaurant);
         return bestRestaurant.restaurantId;
     },
     filterRestaurantsByTimeAndRarity(restaurantList, rarity) {
@@ -226,11 +250,11 @@ const restaurantManager = {
             const timeSinceOpening = this.getRestaurantTimerInfo(restaurant).timeSinceOpening;
             if (timeSinceOpening < threeHours) {
                 const hasSuitableRestaurantDish = (_a = restaurant.restaurant_dishes) === null || _a === void 0 ? void 0 : _a.find((dish) => {
-                    const dishRarity = config_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[dish.dish.atomichub_template_id];
+                    const dishRarity = gameConfig_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[dish.dish.atomichub_template_id];
                     return dishRarity <= rarity;
                 });
                 const hasSuitableChefDish = (_b = restaurant.chefs_dishes) === null || _b === void 0 ? void 0 : _b.find((dish) => {
-                    const dishRarity = config_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[dish.dish.atomichub_template_id];
+                    const dishRarity = gameConfig_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[dish.dish.atomichub_template_id];
                     return dishRarity <= rarity;
                 });
                 if (hasSuitableRestaurantDish || hasSuitableChefDish)
@@ -240,7 +264,7 @@ const restaurantManager = {
         console.log(filteredList);
         return filteredList;
     },
-    async signContractForCharacter(character) {
+    async findAndSignContractForCharacter(character) {
         const characterCardId = character.card_id;
         const restaurantId = await this.findSuitableRestaurantId(character);
         if (restaurantId) {
@@ -330,7 +354,7 @@ const restaurantManager = {
             4: 1.1,
             5: 1.6,
         };
-        const rarity = config_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
+        const rarity = gameConfig_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
         return coefficientMap[rarity];
     },
     getDishPullCountCoefficient(dishPullCount) {
@@ -349,15 +373,15 @@ const restaurantManager = {
         return [dish];
     },
     filterAvailableDishCards(character, dishCardList) {
-        if (character.card_type === config_1.default.card_types.CARD_TYPE_CHEF) {
+        if (character.card_type === gameConfig_1.default.card_types.CARD_TYPE_CHEF) {
             return dishCardList;
         }
-        const characterRarity = config_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
+        const characterRarity = gameConfig_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
         const filteredDishCardList = dishCardList.filter((dish) => {
             const templateId = "dish_atomichub_template_id" in dish
                 ? dish.dish_atomichub_template_id
                 : dish.atomichub_template_id;
-            const dishRarity = config_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
+            const dishRarity = gameConfig_1.default.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
             return characterRarity >= dishRarity;
         });
         return filteredDishCardList;
@@ -473,7 +497,7 @@ const API = {
             (0, logger_1.default)(`${error.message}`);
         }
     },
-    async getOpenedRestaurants() {
+    async getOpenedRestaurants(next) {
         const params = {
             search: "",
             fee: "",
@@ -494,14 +518,13 @@ const API = {
             },
         };
         try {
-            const res = await fetch(`/v1/restaurants/?${helper_1.default.queryParamsToString(params)}`, options);
+            const res = await fetch(next ? next : `/v1/restaurants/?${helper_1.default.queryParamsToString(params)}`, options);
             const resData = await res.json();
             if (resData.status === "STATUS_FAILURE") {
                 console.log(resData);
                 throw new Error("Restaurant request failed");
             }
-            const restaurantList = resData.restaurant_list.results;
-            return restaurantList;
+            return resData;
         }
         catch (error) {
             (0, logger_1.default)(`${error.message}`);
@@ -752,7 +775,7 @@ exports["default"] = navigation;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const rawConfig = {
+const gameConfig = {
     rarities: [
         "RARITY_RAW",
         "RARITY_RARE",
@@ -1062,8 +1085,20 @@ const rawConfig = {
     },
     WITHDRAW_FEE_DAYS_COUNT: 20,
 };
-const config = rawConfig;
+const config = gameConfig;
 exports["default"] = config;
+
+
+/***/ }),
+/* 8 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const settings = {
+    findContractForCookIsEnabled: false,
+};
+exports["default"] = settings;
 
 
 /***/ })

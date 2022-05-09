@@ -14,9 +14,10 @@ import {
 } from "../types";
 import { isChef, isCook } from "../types/typeguards";
 import API from "./api";
-import config from "./config";
+import config from "../configs/gameConfig";
 import Helper from "./helper";
 import logger from "./logger";
+import settings from "../configs/settings";
 
 const restaurantManager = {
   async manageRestaurants(): Promise<number> {
@@ -41,7 +42,6 @@ const restaurantManager = {
     }
 
     const timeToNextAction = await this.getTimeUntilNextAction();
-
     return timeToNextAction;
   },
 
@@ -55,8 +55,17 @@ const restaurantManager = {
   },
 
   async handleCharacterStatus(character: CharacterCook | CharacterChef) {
-    if (!this.hasContract(character) && isCook(character))
-      return await this.signContractForCharacter(character);
+    const isCharacterResting =
+      this.getCharacterTimerInfo(character).isCharacterResting;
+    if (isCharacterResting) return;
+    // If we have free cook, who is not resting at this moment -> sign contract for him
+    if (
+      isCook(character) &&
+      !this.hasContract(character) &&
+      settings.findContractForCookIsEnabled
+    ) {
+      return await this.findAndSignContractForCharacter(character);
+    }
 
     const characterCardId = character.card_id;
     const characterId = character.id;
@@ -122,17 +131,26 @@ const restaurantManager = {
 
     if (myCharacters) {
       myCharacters.forEach((character) => {
-        if (this.hasContract(character)) {
-          const { cookEnd, currentTime, isRestaurantOpened } =
-            this.getCharacterTimerInfo(character);
+        const {
+          cookEnd,
+          restEnd,
+          currentTime,
+          isRestaurantOpened,
+          isCharacterResting,
+        } = this.getCharacterTimerInfo(character);
 
-          if (isRestaurantOpened) {
-            const timer = cookEnd - currentTime + additionalTime;
-            listOfTimers.push(timer);
-          }
+        if (this.hasContract(character) && isRestaurantOpened) {
+          const timer = cookEnd - currentTime + additionalTime;
+          listOfTimers.push(timer);
+        }
+
+        if (isCook(character) && isCharacterResting) {
+          const timer = restEnd - currentTime + additionalTime;
+          listOfTimers.push(timer);
         }
       });
     }
+    console.log(listOfTimers.map((timer) => Helper.msToTime(timer)));
     const timeToNextAction = Math.min(...listOfTimers);
     return timeToNextAction;
   },
@@ -160,22 +178,26 @@ const restaurantManager = {
 
   getCharacterTimerInfo(character: Character): CharacterTimerInfo {
     const restaurantStartWork = new Date(
-      character.restaurant_worker_contracts[0].restaurant_start_work
+      character.restaurant_worker_contracts[0]?.restaurant_start_work
     ).getTime();
     const restaurantEndWork = new Date(
-      character.restaurant_worker_contracts[0].restaurant_end_work
+      character.restaurant_worker_contracts[0]?.restaurant_end_work
     ).getTime();
     const cookEnd = new Date(character.cook_end).getTime();
+    const restEnd = new Date(character.rest_end).getTime();
     const currentTime = Date.now();
 
     const isRestaurantOpened =
       currentTime > restaurantStartWork && currentTime < restaurantEndWork;
     const isCharacterCanStartCook = currentTime > cookEnd;
+    const isCharacterResting = currentTime < restEnd;
     return {
       cookEnd,
+      restEnd,
       currentTime,
       isRestaurantOpened,
       isCharacterCanStartCook,
+      isCharacterResting,
     };
   },
 
@@ -246,8 +268,26 @@ const restaurantManager = {
     };
   },
 
+  // wutafack is this
+  async findOpenedRestaurants(
+    restaurantList: Restaurant[] = [],
+    nextPage?: string
+  ): Promise<Restaurant[]> {
+    // dont look at me please
+    const resData = await API.getOpenedRestaurants(nextPage);
+    const { results, next } = resData?.restaurant_list!;
+
+    restaurantList = [...restaurantList, ...results];
+
+    if (!next) {
+      return restaurantList;
+    }
+    await Helper.sleep(2000);
+    return await this.findOpenedRestaurants(restaurantList, next);
+  },
+
   async findSuitableRestaurantId(character: CharacterCook) {
-    const restaurantList = await API.getOpenedRestaurants();
+    const restaurantList = await this.findOpenedRestaurants();
     const dishPullList = await API.getDishPullList();
 
     if (!restaurantList) return logger("Failed to find restaurants to choose");
@@ -264,7 +304,6 @@ const restaurantManager = {
       return logger(
         `Cant find suitable restaurant for cook(id: ${character.id}) (try manually)`
       );
-
     const restaurantBestDishCombinationList = filteredRestaurants.map(
       (restaurant) => {
         const fee = restaurant.fee;
@@ -310,7 +349,6 @@ const restaurantManager = {
     const bestRestaurant = restaurantBestDishCombinationList.reduce(
       (prev, cur) => (cur.profit > prev.profit ? cur : prev)
     );
-    console.log(bestRestaurant);
     return bestRestaurant.restaurantId;
   },
 
@@ -348,7 +386,7 @@ const restaurantManager = {
     return filteredList;
   },
 
-  async signContractForCharacter(character: CharacterCook) {
+  async findAndSignContractForCharacter(character: CharacterCook) {
     const characterCardId = character.card_id;
     const restaurantId = await this.findSuitableRestaurantId(character);
 

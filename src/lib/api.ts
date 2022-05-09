@@ -5,6 +5,7 @@ import {
   Params,
   DishPull,
   RestaurantDishesToCook,
+  RestaurantResponse,
 } from "../types";
 import Helper from "./helper";
 import logger from "./logger";
@@ -94,7 +95,7 @@ const API = {
     }
   },
 
-  async getOpenedRestaurants() {
+  async getOpenedRestaurants(next?: string) {
     const params: Params = {
       search: "",
       fee: "",
@@ -118,19 +119,17 @@ const API = {
 
     try {
       const res = await fetch(
-        `/v1/restaurants/?${Helper.queryParamsToString(params)}`,
+        next ? next : `/v1/restaurants/?${Helper.queryParamsToString(params)}`,
         options
       );
-      const resData = await res.json();
+      const resData: RestaurantResponse = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
         console.log(resData);
         throw new Error("Restaurant request failed");
       }
 
-      const restaurantList: Restaurant[] = resData.restaurant_list.results;
-
-      return restaurantList;
+      return resData;
     } catch (error: any) {
       logger(`${error.message}`);
     }

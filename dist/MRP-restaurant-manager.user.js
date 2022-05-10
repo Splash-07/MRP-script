@@ -1071,7 +1071,7 @@ exports["default"] = config;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const settings = {
-    findContractForCookIsEnabled: true,
+    findContractForCookIsEnabled: false,
 };
 exports["default"] = settings;
 

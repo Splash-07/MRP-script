@@ -1,4 +1,4 @@
-import { RawConfig } from "../lib/config";
+import { GameConfig } from "../configs/gameConfig";
 
 export interface Params {
   [key: string]: string | boolean;
@@ -13,10 +13,18 @@ export interface Coefficients {
 }
 
 export interface Dish {
-  id: string;
-  templateId: number;
+  dish_id: string;
+  dish_atomichub_template_id: number;
   profit: number;
   time: number;
+}
+
+export interface DishPull {
+  atomichub_template_id: number;
+  cooked_count: number;
+  id: string;
+  name: string;
+  rarity: string;
 }
 
 export interface Card {
@@ -28,7 +36,35 @@ export interface Card {
   updated: string;
 }
 
-export interface CharacterHelper {}
+export interface RestaurantTimerInfo {
+  openTime: number;
+  currentTime: number;
+  timeSinceOpening: number;
+}
+
+export interface DishToCook {
+  coin_boost_modifier: number;
+  dish_atomichub_template_id: number;
+  dish_id: string;
+  restaurant_id: string;
+  worker_card_id: string;
+}
+
+export interface RestaurantDishesToCook {
+  chef_dishes: (DishToCook | Card)[];
+  next_dishes_to_cook_update: string;
+  restaurant_dishes: (DishToCook | Card)[];
+  worker_dishes: (DishToCook | Card)[];
+}
+
+export interface CharacterTimerInfo {
+  cookEnd: number;
+  currentTime: number;
+  restEnd: number;
+  isRestaurantOpened: boolean;
+  isCharacterCanStartCook: boolean;
+  isCharacterResting: boolean;
+}
 
 export interface RestaurantContract {
   actual_end: string;
@@ -73,18 +109,21 @@ export interface Restaurant {
   last_calculated: string;
   min_staff_rating: number;
   name: "Restaurant";
-  restaurant_dishes: { dish: Card }[];
+  restaurant_dishes?: { dish: Card }[];
+  chefs_dishes?: { dish: Card }[];
   restaurant_worker_contracts: RestaurantContract[];
   owner_id: string;
   rating: number;
+  start_work: string;
+  start_working_hours: string;
+  updated: string;
 }
 
 export interface Character {
   atomichub_template_id: number;
   card_id: string;
   card_type: string;
-  chef_dishes: { dish: Card }[];
-  chef_helpers: { helper: Card }[];
+
   contract_end: string;
   cook_end: string;
   created: string;
@@ -99,6 +138,15 @@ export interface Character {
   work_end: string;
 }
 
+export interface CharacterChef extends Character {
+  chef_dishes: { dish: Card }[];
+  chef_helpers: { helper: Card }[];
+}
+export interface CharacterCook extends Character {
+  cook_dishes: { dish: Card }[];
+  cook_helpers: { helper: Card }[];
+}
+
 export interface CharacterResponse {
   character_list: {
     count: number;
@@ -107,6 +155,10 @@ export interface CharacterResponse {
     results: Character[];
   };
   status: string;
+}
+
+export interface SettingsConfig {
+  findContractForCookIsEnabled: boolean;
 }
 
 export interface RestaurantResponse {
@@ -125,7 +177,7 @@ export interface HelperCard {
 
 export interface Config
   extends Omit<
-    RawConfig,
+    GameConfig,
     | "helper_speed_up"
     | "dishes_time_to_cook"
     | "dish_slots_by_template_id"

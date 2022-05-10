@@ -1,13 +1,7 @@
 import { Config } from "../types";
 
-const rawConfig = {
-  rarities: [
-    "RARITY_RAW",
-    "RARITY_RARE",
-    "RARITY_MEDIUM_RARE",
-    "RARITY_MEDIUM_WELL",
-    "RARITY_WELL_DONE",
-  ],
+const gameConfig = {
+  rarities: ["RARITY_RAW", "RARITY_RARE", "RARITY_MEDIUM_RARE", "RARITY_MEDIUM_WELL", "RARITY_WELL_DONE"],
   rarity_names: {
     RARITY_RAW: "Raw",
     RARITY_RARE: "Rare",
@@ -23,12 +17,10 @@ const rawConfig = {
     RARITY_WELL_DONE: 5,
   },
   templates_in_game: [
-    434217, 434222, 434221, 434219, 434218, 441193, -1, -1, -1, -1, 434228,
-    434226, 434232, 434233, 434234, 485187, -1, -1, -1, -1, 407037, 407038,
-    407040, 407041, 407042, 437349, 437345, 485208, 485207, 485216, 485204,
-    485190, 485193, 437346, 441209, 441208, 442120, 485212, 441210, 485202,
-    441212, 437343, 437344, 416361, 441207, 437347, 441194, 437350, 433259,
-    475222, 475223, 475224,
+    434217, 434222, 434221, 434219, 434218, 441193, -1, -1, -1, -1, 434228, 434226, 434232, 434233, 434234, 485187, -1,
+    -1, -1, -1, 407037, 407038, 407040, 407041, 407042, 437349, 437345, 485208, 485207, 485216, 485204, 485190, 485193,
+    437346, 441209, 441208, 442120, 485212, 441210, 485202, 441212, 437343, 437344, 416361, 441207, 437347, 441194,
+    437350, 433259, 475222, 475223, 475224,
   ],
   restaurant_statuses: {
     RESTAURANT_STATUS_OPENED: "Opened",
@@ -310,9 +302,6 @@ const rawConfig = {
   },
   WITHDRAW_FEE_DAYS_COUNT: 20,
 };
-
-export type RawConfig = typeof rawConfig;
-
-const config: Config = rawConfig;
-
+export type GameConfig = typeof gameConfig;
+const config: Config = gameConfig;
 export default config;

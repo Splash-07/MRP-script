@@ -17,7 +17,7 @@ QoL script made to manage your restaurant
 2. Use trough tampermonkey. Install [Tampermonkey browser extension](https://www.tampermonkey.net/), open tampermonkey dashboard, copy everything in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) file, paste it in editor and save it
 
 - **COOK SETTINGS**
-1. By default, people themselves search for a restaurant and sign a cook, and then the script will start cooking (nothing needs to be changed in the script).
+1. By default, people themselves search for a restaurant and sign a cook, and then the script will start cooking (**after page refresh**) (nothing needs to be changed in the script).
 2. For those who want the script to do everything (search for a restaurant, sign a cook, etc.), you need to change the value from **"false"** to **"true"**.
 To change settings options, you need to find (use ctrl+f) in [MRP-restaurant-manager.user.js](/dist/MRP-restaurant-manager.user.js) the following object
 

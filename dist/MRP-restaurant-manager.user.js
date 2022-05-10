@@ -103,7 +103,7 @@ const restaurantManager = {
                     const timer = cookEnd - currentTime + additionalTime;
                     listOfTimers.push(timer);
                 }
-                if ((0, typeguards_1.isCook)(character)) {
+                if ((0, typeguards_1.isCook)(character) && settings_1.default.findContractForCookIsEnabled) {
                     if (isCharacterResting) {
                         const timer = restEnd - currentTime + additionalTime;
                         listOfTimers.push(timer);

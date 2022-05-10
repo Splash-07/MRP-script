@@ -121,7 +121,7 @@ const restaurantManager = {
           listOfTimers.push(timer);
         }
 
-        if (isCook(character)) {
+        if (isCook(character) && settings.findContractForCookIsEnabled) {
           if (isCharacterResting) {
             const timer = restEnd - currentTime + additionalTime;
             listOfTimers.push(timer);

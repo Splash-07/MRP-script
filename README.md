@@ -2,6 +2,12 @@
 
 QoL script made to manage your restaurant
 
+<p align="center">
+<img src="Intro.png">
+</p>
+
+
+
 # Important
 
 - You have to be logged in and verified on [MRP Game](https://game.medium-rare-potato.io) before using this script

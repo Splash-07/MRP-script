@@ -6,8 +6,6 @@ QoL script made to manage your restaurant
 <img src="Intro.png">
 </p>
 
-
-
 # Important
 
 - You have to be logged in and verified on [MRP Game](https://game.medium-rare-potato.io) before using this script
@@ -15,7 +13,7 @@ QoL script made to manage your restaurant
 
 # Usage
 
-1. Install [Tampermonkey browser extension](https://www.tampermonkey.net/)
+1. Install [Tampermonkey](https://www.tampermonkey.net/) browser extension
 2. Open tampermonkey dashboard, copy everything in [mrp-script.user.js](/mrp-script.user.js) file, paste it in editor and save it
 
 # Workflow
@@ -31,9 +29,6 @@ QoL script made to manage your restaurant
 - Calculate time until next action
 - Sleep until next action
 
-# TODO
-
-1. Add UI
 
 ## Main algorithms workflow
 

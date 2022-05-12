@@ -7,9 +7,9 @@ import {
   RestaurantDishesToCook,
   RestaurantResponse,
 } from "../types";
-import Helper from "./helper";
-import logger from "./logger";
-import navigation from "./navigation";
+import { queryParamsToString, sleep } from "../utils";
+import logger from "./logger.service";
+import navigation from "./navigation.service";
 
 const API = {
   async getMyRestaurants() {
@@ -35,7 +35,7 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/user/restaurants/?${Helper.queryParamsToString(params)}`, options);
+      const res = await fetch(`/v1/user/restaurants/?${queryParamsToString(params)}`, options);
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -107,7 +107,7 @@ const API = {
     };
 
     try {
-      const res = await fetch(next ? next : `/v1/restaurants/?${Helper.queryParamsToString(params)}`, options);
+      const res = await fetch(next ? next : `/v1/restaurants/?${queryParamsToString(params)}`, options);
       const resData: RestaurantResponse = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -175,7 +175,7 @@ const API = {
       logger(`Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`);
       console.log("Set worker response data:", resData);
       console.log("Await 1 minute after contract signing, before continue");
-      await Helper.sleep(60000);
+      await sleep(60000);
     } catch (error: any) {
       logger(`${error.message}`);
     }
@@ -232,7 +232,7 @@ const API = {
 
       logger(`Character (id: ${characterCardId} start cooking in restaurant (id: ${restaurantId})`);
       console.log("Start cooking with response data:", resData);
-      await Helper.sleep(5000);
+      await sleep(5000);
       await navigation.closeModal();
       await navigation.myCharacters();
     } catch (error: any) {
@@ -262,7 +262,7 @@ const API = {
 
       logger("Restaurant has been opened");
       console.log("Open restaurant response data:", resData);
-      await Helper.sleep(5000);
+      await sleep(5000);
       await navigation.myRestaurants(); // update page
     } catch (error: any) {
       logger(`${error.message}`);

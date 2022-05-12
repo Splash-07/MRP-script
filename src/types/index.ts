@@ -22,6 +22,8 @@ export interface Dish {
 export interface DishPull {
   atomichub_template_id: number;
   cooked_count: number;
+  cooked_dish_mining_modifier: number;
+  price: number;
   id: string;
   name: string;
   rarity: string;
@@ -108,7 +110,7 @@ export interface Restaurant {
   internal_team_total_slots: number;
   last_calculated: string;
   min_staff_rating: number;
-  name: "Restaurant";
+  name: string;
   restaurant_dishes?: { dish: Card }[];
   chefs_dishes?: { dish: Card }[];
   restaurant_worker_contracts: RestaurantContract[];
@@ -175,6 +177,11 @@ export interface HelperCard {
   helper: Card;
 }
 
+export interface NextActionInfo {
+  restaurants?: Restaurant[];
+  characters?: Character[];
+  timeToNextAction: number;
+}
 export interface Config
   extends Omit<
     GameConfig,
@@ -189,7 +196,15 @@ export interface Config
     | "CHEF_CONTRACT_REWARD_PERCENTS"
     | "PRICE_SLICE_OF_CAKE"
     | "RARITY_LEVELS_BY_TEMPLATE_ID"
+    // | "templateImages"
+    // | "templateIdNames"
   > {
+  // templateImages: {
+  //   [key: number]: string;
+  // };
+  // templateIdNames: {
+  //   [key: number]: string;
+  // };
   helper_speed_up: {
     [key: string]: number;
   };

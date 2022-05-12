@@ -1,3 +1,4 @@
+import { NextActionInfo } from "./../types/index";
 import {
   Card,
   Character,
@@ -13,14 +14,14 @@ import {
   DishToCook,
 } from "../types";
 import { isChef, isCook } from "../types/typeguards";
-import API from "./api";
+import API from "./api.service";
 import config from "../configs/gameConfig";
-import Helper from "./helper";
-import logger from "./logger";
+import logger from "./logger.service";
 import settings from "../configs/settings";
+import { msToTime, sleep } from "../utils";
 
 const restaurantManager = {
-  async manageRestaurants(): Promise<number> {
+  async manageRestaurants(): Promise<NextActionInfo> {
     const myRestaurants = await API.getMyRestaurants();
     console.log("restaurant:", myRestaurants);
 
@@ -41,7 +42,7 @@ const restaurantManager = {
       }
     }
 
-    const timeToNextAction = await this.getTimeUntilNextAction();
+    const timeToNextAction = await this.getNextActionInfo();
     return timeToNextAction;
   },
 
@@ -96,14 +97,16 @@ const restaurantManager = {
     }
   },
 
-  async getTimeUntilNextAction(): Promise<number> {
-    const myRestaurants = await API.getMyRestaurants();
-    const myCharacters = await API.getMyCharacters();
+  async getNextActionInfo(): Promise<NextActionInfo> {
+    const restaurants = await API.getMyRestaurants();
+    const characters = await API.getMyCharacters();
+    // nft status
+    // next action to do
 
     const listOfTimers: number[] = [];
-    const additionalTime = 70000; // idk where im loosing ~40 sec when trying to calculate character timer
-    if (myRestaurants) {
-      myRestaurants.forEach((restaurant) => {
+    const additionalTime = 60000; // idk where im loosing ~40 sec when trying to calculate character timer
+    if (restaurants) {
+      restaurants.forEach((restaurant) => {
         const { currentTime, openTime } = this.getRestaurantTimerInfo(restaurant);
 
         const timer = openTime - currentTime + additionalTime;
@@ -111,8 +114,8 @@ const restaurantManager = {
       });
     }
 
-    if (myCharacters) {
-      myCharacters.forEach((character) => {
+    if (characters) {
+      characters.forEach((character) => {
         const { cookEnd, restEnd, currentTime, isRestaurantOpened, isCharacterResting } =
           this.getCharacterTimerInfo(character);
 
@@ -135,9 +138,13 @@ const restaurantManager = {
         }
       });
     }
-    console.log(listOfTimers.map((timer) => Helper.msToTime(timer)));
-    const timeToNextAction = Math.min(...listOfTimers);
-    return timeToNextAction;
+    console.log(listOfTimers.map((timer) => msToTime(timer)));
+    const timeToNextAction = Math.min(...listOfTimers) ?? 0;
+    return {
+      restaurants,
+      characters,
+      timeToNextAction,
+    };
   },
 
   getRestaurantTimerInfo(restaurant: Restaurant): RestaurantTimerInfo {
@@ -239,7 +246,7 @@ const restaurantManager = {
     if (!next) {
       return restaurantList;
     }
-    await Helper.sleep(2000);
+    await sleep(2000);
     return await this.findOpenedRestaurants(restaurantList, next);
   },
 
@@ -484,22 +491,29 @@ const restaurantManager = {
     return character.restaurant_worker_contracts && character.restaurant_worker_contracts.length > 0;
   },
 
-  async init() {
-    logger("Script will be initialized in 10 seconds");
-    await Helper.sleep(10000);
-    logger("Script initialized");
+  // async init() {
+  //   const isInitialized = store.getState().restaurant.isInitialized;
 
-    let sleepTimer = 60000;
-    while (true) {
-      sleepTimer = await this.manageRestaurants();
-      if (sleepTimer < 0) {
-        sleepTimer = 30000;
-      }
-      logger(`Next action will be performed in ${Helper.msToTime(sleepTimer)}`);
-      await Helper.sleep(sleepTimer);
-    }
-    // await this.manageRestaurants();
-  },
+  //   let sleepTimer = 60000;
+  //   while (isInitialized) {
+  //     store.dispatch(toggleLoading());
+  //     const { restaurants, characters, timeToNextAction } = await this.manageRestaurants();
+  //     sleepTimer = timeToNextAction;
+  //     if (sleepTimer < 0) {
+  //       sleepTimer = 20000;
+  //     }
+  //     const payload = {
+  //       restaurants,
+  //       characters,
+  //       timeToNextAction: sleepTimer,
+  //     };
+  //     store.dispatch(update(payload));
+  //     store.dispatch(toggleLoading());
+  //     logger(`Next action will be performed in ${msToTime(sleepTimer)}`);
+  //     await sleep(sleepTimer);
+  //   }
+  //   // await this.manageRestaurants();
+  // },
 };
 
 export default restaurantManager;

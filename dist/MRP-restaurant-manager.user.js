@@ -2,7 +2,7 @@
                      // @name         Medium Rare Potato restaurant management script
                      // @description  Script made to manage your restaurant in https://game.medium-rare-potato.io/
                      // @namespace    https://github.com/Splash-07/MRP-script
-                     // @version      1.4.0
+                     // @version      1.4.1
                      // @author       Splash-07 (https://github.com/Splash-07)
                      // @match        https://game.medium-rare-potato.io/*
                      // ==/UserScript==
@@ -384,6 +384,9 @@ const restaurantManager = {
         return character.restaurant_worker_contracts && character.restaurant_worker_contracts.length > 0;
     },
     async init() {
+        (0, logger_1.default)("Script will be initialized in 10 seconds");
+        await helper_1.default.sleep(10000);
+        (0, logger_1.default)("Script initialized");
         let sleepTimer = 60000;
         while (true) {
             sleepTimer = await this.manageRestaurants();

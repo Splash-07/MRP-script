@@ -1,4 +1,4 @@
-import { sleep } from "../utils";
+import Helper from "./helper";
 
 const navigation = {
   async myRestaurants() {
@@ -24,7 +24,7 @@ const navigation = {
 
     if (cookBtnByCharId) {
       (cookBtnByCharId as HTMLElement).click();
-      await sleep(4000);
+      await Helper.sleep(4000);
     }
   },
 
@@ -33,7 +33,7 @@ const navigation = {
 
     if (closeModalBtn) {
       (closeModalBtn as HTMLElement).click();
-      await sleep(1000);
+      await Helper.sleep(1000);
     }
   },
 
@@ -41,8 +41,10 @@ const navigation = {
     if (!domElement) return;
 
     (domElement as HTMLElement).click();
-    await sleep(2000);
+    await Helper.sleep(2000);
   },
 };
+
+// ("ef2ece01-1007-4fae-b7ac-32d3066ab29d");
 
 export default navigation;

@@ -1,43 +1,27 @@
 {
   "name": "mrp-script",
-  "version": "2.0.1",
-  "description": "Medium Rare Potato restaurant management script",
-  "author": "Splash-07(https://github.com/Splash-07)",
-  "license": "AGPL-3.0",
+  "version": "1.4.0",
+  "description": "Script made to manage your restaurant",
+  "main": "index.ts",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "serve": "vite preview"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Splash-07/MRP-script.git"
   },
+  "keywords": [],
+  "author": "Splash-07 (https://github.com/Splash-07)",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Splash-07/MRP-script/issues"
   },
   "homepage": "https://github.com/Splash-07/MRP-script#readme",
-  "dependencies": {
-    "@chakra-ui/icons": "^1.1.7",
-    "@chakra-ui/react": "^1.8.8",
-    "@emotion/react": "^11.9.0",
-    "@emotion/styled": "^11.8.1",
-    "@reduxjs/toolkit": "^1.8.1",
-    "framer-motion": "^6.3.3",
-    "lodash.debounce": "^4.0.8",
-    "react": "^18.1.0",
-    "react-countdown": "^2.3.2",
-    "react-dom": "^18.1.0",
-    "react-icons": "^4.3.1",
-    "react-redux": "^8.0.1",
-    "redux-persist": "^6.0.0"
-  },
   "devDependencies": {
-    "@types/lodash.debounce": "^4.0.7",
-    "@types/react": "^18.0.9",
-    "@types/react-dom": "^18.0.3",
-    "@vitejs/plugin-react-refresh": "^1.3.6",
+    "@types/tampermonkey": "^4.0.5",
+    "ts-loader": "^9.3.0",
     "typescript": "^4.6.4",
-    "vite": "^2.9.8"
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
   }
 }

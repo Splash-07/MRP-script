@@ -78,19 +78,13 @@ const restaurantManager = {
                     await api_1.default.startCooking(restaurantId, characterCardId, dishIdsToCook);
                 }
             }
-            else {
-                (0, logger_1.default)(`${character.name}(id:${character.card_id}) already cooking atm`);
-            }
-        }
-        else {
-            (0, logger_1.default)(`Restaurant(id:${character.restaurant_worker_contracts[0].restaurant_id}), in which ${character.name}(id:${character.card_id}) has contract, is closed`);
         }
     },
     async getTimeUntilNextAction() {
         const myRestaurants = await api_1.default.getMyRestaurants();
         const myCharacters = await api_1.default.getMyCharacters();
         const listOfTimers = [];
-        const additionalTime = 60000;
+        const additionalTime = 5000;
         if (myRestaurants) {
             myRestaurants.forEach((restaurant) => {
                 const { currentTime, openTime } = this.getRestaurantTimerInfo(restaurant);
@@ -145,7 +139,7 @@ const restaurantManager = {
         const restaurantStartWork = new Date((_a = character.restaurant_worker_contracts[0]) === null || _a === void 0 ? void 0 : _a.restaurant_start_work).getTime();
         const restaurantEndWork = new Date((_b = character.restaurant_worker_contracts[0]) === null || _b === void 0 ? void 0 : _b.restaurant_end_work).getTime();
         const characterWorkEnd = new Date(character.work_end).getTime();
-        const cookEnd = new Date(character.cook_end).getTime();
+        const cookEnd = new Date(character.restaurant_worker_contracts[0].next_dishes_to_cook_update).getTime();
         const restEnd = new Date(character.rest_end).getTime();
         const currentTime = Date.now();
         const isRestaurantOpened = currentTime > restaurantStartWork && currentTime < restaurantEndWork;
@@ -271,7 +265,6 @@ const restaurantManager = {
                     return true;
             }
         });
-        console.log(filteredList);
         return filteredList;
     },
     async findAndSignContractForCharacter(character) {
@@ -372,7 +365,7 @@ const restaurantManager = {
     findBestRatioDish(dishList) {
         if (dishList.length < 1)
             return [];
-        const dish = dishList.reduce((prev, cur) => (cur.profit / cur.time > prev.profit / prev.time ? cur : prev));
+        const dish = dishList.reduce((prev, cur) => (cur.profit > prev.profit ? cur : prev));
         return [dish];
     },
     filterAvailableDishCards(character, dishCardList) {
@@ -391,9 +384,6 @@ const restaurantManager = {
         return character.restaurant_worker_contracts && character.restaurant_worker_contracts.length > 0;
     },
     async init() {
-        (0, logger_1.default)("Script will be initialized in 10 seconds");
-        await helper_1.default.sleep(10000);
-        (0, logger_1.default)("Script initialized");
         let sleepTimer = 60000;
         while (true) {
             sleepTimer = await this.manageRestaurants();

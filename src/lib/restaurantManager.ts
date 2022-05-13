@@ -80,6 +80,7 @@ const restaurantManager = {
       if (isCharacterCanStartCook) {
         const dishPullList = await API.getDishPullList();
         const dishesToCook = await API.getDishesToCook(restaurantId, character.card_id, character.id);
+
         if (!dishPullList) return logger("Cant fetch dishPull list");
         if (!dishesToCook) return logger(`Cant fetch dishes to cook for ${character.name}(id: ${characterId})`);
 
@@ -90,13 +91,7 @@ const restaurantManager = {
         if (dishIdsToCook) {
           await API.startCooking(restaurantId, characterCardId, dishIdsToCook);
         }
-      } else {
-        logger(`${character.name}(id:${character.card_id}) already cooking atm`);
       }
-    } else {
-      logger(
-        `Restaurant(id:${character.restaurant_worker_contracts[0].restaurant_id}), in which ${character.name}(id:${character.card_id}) has contract, is closed`
-      );
     }
   },
 
@@ -105,7 +100,7 @@ const restaurantManager = {
     const myCharacters = await API.getMyCharacters();
 
     const listOfTimers: number[] = [];
-    const additionalTime = 60000; // idk where im loosing ~40 sec when trying to calculate character timer
+    const additionalTime = 5000; // idk where im loosing ~40 sec when trying to calculate character timer
     if (myRestaurants) {
       myRestaurants.forEach((restaurant) => {
         const { currentTime, openTime } = this.getRestaurantTimerInfo(restaurant);
@@ -170,7 +165,7 @@ const restaurantManager = {
     const restaurantStartWork = new Date(character.restaurant_worker_contracts[0]?.restaurant_start_work).getTime();
     const restaurantEndWork = new Date(character.restaurant_worker_contracts[0]?.restaurant_end_work).getTime();
     const characterWorkEnd = new Date(character.work_end).getTime();
-    const cookEnd = new Date(character.cook_end).getTime();
+    const cookEnd = new Date(character.restaurant_worker_contracts[0].next_dishes_to_cook_update).getTime();
     const restEnd = new Date(character.rest_end).getTime();
     const currentTime = Date.now();
 
@@ -319,7 +314,6 @@ const restaurantManager = {
         if (hasSuitableRestaurantDish || hasSuitableChefDish) return true;
       }
     });
-    console.log(filteredList);
     return filteredList;
   },
 
@@ -410,7 +404,6 @@ const restaurantManager = {
       dishPullList,
       character
     );
-
     const maxTime = 180;
     const dishCombination = this.getMaxProfitableCombinationOfDish(dishList, maxTime);
     return dishCombination;
@@ -439,7 +432,6 @@ const restaurantManager = {
     const filteredChefDishCardList = this.filterAvailableDishCards(character, chefDishCards);
     const chefDishes = filteredChefDishCardList.map((card) => this.getDishInfo(card, helpersAccelerationRate, dishPullList));
     const bestChefDish = this.findBestRatioDish(chefDishes) ?? [];
-
     // character dishes
     const filteredCharacterDishCardList = this.filterAvailableDishCards(character, characterDishCards);
     const characterDishes = filteredCharacterDishCardList.map((card) =>
@@ -471,8 +463,7 @@ const restaurantManager = {
 
   findBestRatioDish(dishList: Dish[]): [Dish] | [] {
     if (dishList.length < 1) return [];
-
-    const dish = dishList.reduce((prev, cur) => (cur.profit / cur.time > prev.profit / prev.time ? cur : prev));
+    const dish = dishList.reduce((prev, cur) => (cur.profit > prev.profit ? cur : prev));
     return [dish];
   },
 
@@ -497,9 +488,9 @@ const restaurantManager = {
   },
 
   async init() {
-    logger("Script will be initialized in 10 seconds");
-    await Helper.sleep(10000);
-    logger("Script initialized");
+    // logger("Script will be initialized in 10 seconds");
+    // await Helper.sleep(10000);
+    // logger("Script initialized");
 
     let sleepTimer = 60000;
     while (true) {

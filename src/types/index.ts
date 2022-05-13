@@ -42,6 +42,7 @@ export interface RestaurantTimerInfo {
   openTime: number;
   currentTime: number;
   timeSinceOpening: number;
+  isOpened: boolean;
 }
 
 export interface DishToCook {

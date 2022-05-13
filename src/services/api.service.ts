@@ -147,7 +147,7 @@ const API = {
     }
   },
 
-  async setWorker(characterCardId: string, restaurantId: string) {
+  async setWorker(characterCardId: string, restaurant_Id: string, signContractWithRestaurantIsEnabled: boolean) {
     // await navigation.myRestaurants();
 
     const options = {
@@ -164,7 +164,7 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/restaurants/${restaurantId}/set-worker/`, options);
+      const res = await fetch(`/v1/restaurants/${restaurant_Id}/set-worker/`, options);
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -172,10 +172,14 @@ const API = {
         throw new Error("Set worker request failure");
       }
 
-      logger(`Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`);
+      logger(`Restaurant (id: ${restaurant_Id}) has signed contract with our cook (id:${characterCardId})`);
       console.log("Set worker response data:", resData);
-      console.log("Await 1 minute after contract signing, before continue");
-      await sleep(60000);
+      if (!signContractWithRestaurantIsEnabled) {
+        console.log("Await 1 minute after contract signing, before continue");
+        await sleep(60000);
+      } else {
+        await sleep(3000);
+      }
     } catch (error: any) {
       logger(`${error.message}`);
     }

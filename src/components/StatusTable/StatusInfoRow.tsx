@@ -2,9 +2,9 @@ import React, { FC, useEffect, useState } from "react";
 import { GridItem, Image, Text } from "@chakra-ui/react";
 import restaurantManager from "../../services/restaurantManager.service";
 import { Character, Restaurant } from "../../types";
-import Countdown from "../Countdown";
 import { isCharacter, isRestaurant } from "../../types/typeguards";
 import config from "../../configs/gameConfig";
+import CountdownTimer from "../CountdownTimer";
 
 interface StatusInfoRowProps {
   content: Restaurant | Character;
@@ -31,6 +31,8 @@ const StatusInfoRow: FC<StatusInfoRowProps> = ({ content }) => {
         const timer = cookEnd - currentTime + additionalTime;
         setTimer(timer);
       }
+
+      // TODO:CODE REFACTORING ONE FUNCTION FOR ALL
     }
   }, []);
 
@@ -43,7 +45,7 @@ const StatusInfoRow: FC<StatusInfoRowProps> = ({ content }) => {
         <Text>{name}</Text>
       </GridItem>
       <GridItem colSpan={2} textAlign="center">
-        {timer && <Countdown timer={timer} />}
+        {timer && <CountdownTimer time={timer!} />}
       </GridItem>
     </>
   );

@@ -10,7 +10,7 @@ export interface RestaurantState {
     restaurants?: Restaurant[];
     characters?: Character[];
   };
-  next?: number;
+  next: number | null;
 }
 
 const initialState: RestaurantState = {
@@ -22,7 +22,7 @@ const initialState: RestaurantState = {
     restaurants: undefined,
     characters: undefined,
   },
-  next: undefined,
+  next: null,
 };
 
 export const restaurantSlice = createSlice({

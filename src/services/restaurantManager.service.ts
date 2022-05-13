@@ -17,8 +17,8 @@ import { isChef, isCook } from "../types/typeguards";
 import API from "./api.service";
 import config from "../configs/gameConfig";
 import logger from "./logger.service";
-import settings from "../configs/settings";
 import { msToTime, sleep } from "../utils";
+import { store } from "../store";
 
 const restaurantManager = {
   async manageRestaurants(): Promise<NextActionInfo> {
@@ -56,11 +56,12 @@ const restaurantManager = {
   },
 
   async handleCharacterStatus(character: CharacterCook | CharacterChef) {
+    const findContractForCookIsEnabled = store.getState().settings.findContractForCookIsEnabled;
     const { isRestaurantOpened, isCharacterCanStartCook, isCharacterResting } = this.getCharacterTimerInfo(character);
     // if char is cook and he is resting do nothing
     if (isCook(character) && isCharacterResting) return;
     // If we have free cook, who is not resting at this moment -> sign contract for him
-    if (isCook(character) && !this.hasContract(character) && settings.findContractForCookIsEnabled) {
+    if (isCook(character) && !this.hasContract(character) && findContractForCookIsEnabled) {
       return await this.findAndSignContractForCharacter(character);
     }
 
@@ -104,18 +105,24 @@ const restaurantManager = {
     // next action to do
 
     const listOfTimers: number[] = [];
+    const restaurantCDMap: { [key: string]: number } = {};
     const additionalTime = 60000; // idk where im loosing ~40 sec when trying to calculate character timer
     if (restaurants) {
       restaurants.forEach((restaurant) => {
-        const { currentTime, openTime } = this.getRestaurantTimerInfo(restaurant);
+        const { currentTime, openTime, isOpened } = this.getRestaurantTimerInfo(restaurant);
 
         const timer = openTime - currentTime + additionalTime;
         listOfTimers.push(timer);
+
+        const timerForCDMap = isOpened ? 0 : timer;
+        restaurantCDMap[restaurant.id] = timerForCDMap;
       });
     }
 
     if (characters) {
+      const findContractForCookIsEnabled = store.getState().settings.findContractForCookIsEnabled;
       characters.forEach((character) => {
+        const signContractWithRestaurantIsEnabled = store.getState().settings.signContractWithRestaurant;
         const { cookEnd, restEnd, currentTime, isRestaurantOpened, isCharacterResting } =
           this.getCharacterTimerInfo(character);
 
@@ -124,7 +131,7 @@ const restaurantManager = {
           listOfTimers.push(timer);
         }
 
-        if (isCook(character) && settings.findContractForCookIsEnabled) {
+        if (isCook(character) && (findContractForCookIsEnabled || signContractWithRestaurantIsEnabled)) {
           if (isCharacterResting) {
             const timer = restEnd - currentTime + additionalTime;
             listOfTimers.push(timer);
@@ -132,7 +139,12 @@ const restaurantManager = {
 
           if (!isCharacterResting && !this.hasContract(character)) {
             // if cant find suitable restaurant, do it again in 2 minutes
-            const timer = 120000;
+            let timer = 45000;
+            if (signContractWithRestaurantIsEnabled) {
+              listOfTimers.push(timer);
+              return;
+            }
+            timer = 12000;
             listOfTimers.push(timer);
           }
         }
@@ -150,15 +162,18 @@ const restaurantManager = {
   getRestaurantTimerInfo(restaurant: Restaurant): RestaurantTimerInfo {
     const currentTime = Date.now();
     const msInHour = 3600000; // 1 hour
-    const restaurantCD = (24 - config.restaurant_working_hours_by_template_id[restaurant.atomichub_template_id]) * msInHour;
+    const restaurantWorkingHours = config.restaurant_working_hours_by_template_id[restaurant.atomichub_template_id];
+
+    const restaurantCD = (24 - restaurantWorkingHours) * msInHour;
     const openTime = new Date(restaurant.end_work).getTime() + restaurantCD;
 
     const timeSinceOpening = currentTime - new Date(restaurant.start_work).getTime();
-
+    const isOpened = timeSinceOpening < restaurantWorkingHours * msInHour;
     return {
       openTime,
       currentTime,
       timeSinceOpening,
+      isOpened,
     };
   },
 
@@ -320,11 +335,12 @@ const restaurantManager = {
   },
 
   async findAndSignContractForCharacter(character: CharacterCook) {
+    const { state, restaurantId } = store.getState().settings.signContractWithRestaurant;
     const characterCardId = character.card_id;
-    const restaurantId = await this.findSuitableRestaurantId(character);
+    const restaurant_Id = state ? restaurantId : await this.findSuitableRestaurantId(character);
 
     if (restaurantId) {
-      await API.setWorker(characterCardId, restaurantId);
+      await API.setWorker(characterCardId, restaurant_Id!, state);
     }
   },
 

@@ -131,7 +131,7 @@ const restaurantManager = {
           listOfTimers.push(timer);
         }
 
-        if (isCook(character) && (findContractForCookIsEnabled || signContractWithRestaurantIsEnabled)) {
+        if (isCook(character) && findContractForCookIsEnabled) {
           if (isCharacterResting) {
             const timer = restEnd - currentTime + additionalTime;
             listOfTimers.push(timer);

@@ -16,10 +16,12 @@ const navigation = {
   async openCookModal(characterId: string) {
     await this.myCharacters();
 
-    const characterBtnList: HTMLElement[] = Array.from(document.querySelectorAll(".character-buttons"));
+    const characterBtnList: HTMLElement[] = Array.from(
+      document.querySelectorAll(".character-buttons")
+    );
 
     const cookBtnByCharId = characterBtnList.find((btnPair) =>
-      (btnPair.children[1] as HTMLAnchorElement).href.includes(characterId)
+      (btnPair.children[1] as HTMLAnchorElement)?.href.includes(characterId)
     )?.children[0];
 
     if (cookBtnByCharId) {
@@ -32,7 +34,7 @@ const navigation = {
     const closeModalBtn = document.querySelector(".modal-close")?.children[0];
 
     if (closeModalBtn) {
-      (closeModalBtn as HTMLElement).click();
+      (closeModalBtn as HTMLElement)?.click();
       await Helper.sleep(1000);
     }
   },

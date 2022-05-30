@@ -1,6 +1,6 @@
 {
   "name": "mrp-script",
-  "version": "1.4.1",
+  "version": "1.6.0",
   "description": "Script made to manage your restaurant",
   "main": "index.ts",
   "scripts": {
@@ -19,6 +19,9 @@
   "homepage": "https://github.com/Splash-07/MRP-script#readme",
   "devDependencies": {
     "@types/tampermonkey": "^4.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0",
+    "eslint": "^8.16.0",
     "ts-loader": "^9.3.0",
     "typescript": "^4.6.4",
     "webpack": "^5.72.0",

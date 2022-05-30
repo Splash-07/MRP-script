@@ -1,5 +1,3 @@
-import { GameConfig } from "../configs/gameConfig";
-
 export interface Params {
   [key: string]: string | boolean;
 }
@@ -14,6 +12,8 @@ export interface Coefficients {
 
 export interface Dish {
   dish_id: string;
+  name: string;
+  price: number;
   dish_atomichub_template_id: number;
   profit: number;
   time: number;
@@ -22,9 +22,11 @@ export interface Dish {
 export interface DishPull {
   atomichub_template_id: number;
   cooked_count: number;
-  id: string;
-  name: string;
-  rarity: string;
+  cooked_dish_mining_modifier: number;
+  id: "string";
+  name: "string";
+  price: number;
+  rarity: "string";
 }
 
 export interface Card {
@@ -159,10 +161,6 @@ export interface CharacterResponse {
 
 export interface SettingsConfig {
   findContractForCookIsEnabled: boolean;
-  signContractWithRestaurant: {
-    state: boolean;
-    restaurant_id: string;
-  };
 }
 
 export interface RestaurantResponse {
@@ -179,23 +177,61 @@ export interface HelperCard {
   helper: Card;
 }
 
-export interface Config
-  extends Omit<
-    GameConfig,
-    | "helper_speed_up"
-    | "dishes_time_to_cook"
-    | "dish_slots_by_template_id"
-    | "helper_slots_by_template_id"
-    | "restaurant_working_hours_by_template_id"
-    | "HELPER_DROP_CHANCES"
-    | "PRICE_RESTAURANT_SLOT_INTERNAL_TEAM"
-    | "PRICE_RESTAURANT_SLOT_EXTERNAL_TEAM"
-    | "CHEF_CONTRACT_REWARD_PERCENTS"
-    | "PRICE_SLICE_OF_CAKE"
-    | "RARITY_LEVELS_BY_TEMPLATE_ID"
-  > {
+export interface Config {
+  rarities: string[];
+  rarity_names: {
+    RARITY_RAW: string;
+    RARITY_RARE: string;
+    RARITY_MEDIUM_RARE: string;
+    RARITY_MEDIUM_WELL: string;
+    RARITY_WELL_DONE: string;
+  };
+  rarity_levels: {
+    RARITY_RAW: number;
+    RARITY_RARE: number;
+    RARITY_MEDIUM_RARE: number;
+    RARITY_MEDIUM_WELL: number;
+    RARITY_WELL_DONE: number;
+  };
+  templates_in_game: number[];
+  restaurant_statuses: {
+    RESTAURANT_STATUS_OPENED: string;
+    RESTAURANT_STATUS_CLOSED: string;
+  };
+  character_statuses: {
+    CHARACTER_STATUS_READY: string;
+    CHARACTER_STATUS_WAITING_FOR_COOK: string;
+    CHARACTER_STATUS_COOKING: string;
+    CHARACTER_STATUS_ON_CONTRACT: string;
+    CHARACTER_STATUS_ON_REST: string;
+    CHARACTER_STATUS_WAITING_TO_OPEN_RESTAURANT: string;
+  };
+  sort_types: {
+    SORT_STATE: string;
+    SORT_TYPE: string;
+    SORT_RARITY: string;
+  };
+  cook_templates: number[];
+  chef_templates: number[];
+  card_types: {
+    CARD_TYPE_COOK: string;
+    CARD_TYPE_CHEF: string;
+    CARD_TYPE_HELPER: string;
+    CARD_TYPE_RESTAURANT: string;
+    CARD_TYPE_DISH: string;
+    CARD_TYPE_SLICE_OF_CAKE: string;
+  };
+  character_contracts: {
+    CARD_TYPE_COOK: number[];
+    CARD_TYPE_CHEF: number[];
+  };
   helper_speed_up: {
     [key: string]: number;
+  };
+  dishes_to_cook_max_count_by_category: {
+    restaurant_dishes: number;
+    chef_dishes: number;
+    worker_dishes: number;
   };
   dishes_time_to_cook: {
     [key: string]: number;
@@ -212,12 +248,31 @@ export interface Config
   HELPER_DROP_CHANCES: {
     [key: string]: number;
   };
+  GAME_WALLET_NAME: string;
+  GAME_COINS_WALLET_NAME: string;
+  GAME_COINS_PRODUCTION_WALLET_NAME: string;
+  GAME_NFTS_COLLECTION_NAME: string;
+  GAME_COINS_SHORT_NAME: string;
+  COIN_PRECISION_AFTER_DOT: string;
+  DISHES_TO_COOK_UPDATE_MINUTES: number;
+  PRICE_SHOP_HELPER: number;
+  SHOP_MAX_COUNT_TO_BUY_HELPER: number;
+  CRAFT_COOK_FROM_HELPER_CHANCES: {
+    [key: string]: { [key: string]: number };
+  };
+  CRAFT_COOK_FROM_HELPER_ALLOWED_COOK_TEMPLATE_IDS: number[];
+  CRAFT_COOK_FROM_HELPER_HELPERS_COUNT: number;
+  CRAFT_COOK_FROM_HELPER_PRICE: number;
   PRICE_RESTAURANT_SLOT_INTERNAL_TEAM: {
     [key: string]: number;
   };
   PRICE_RESTAURANT_SLOT_EXTERNAL_TEAM: {
     [key: string]: number;
   };
+  RESTAURANT_BUY_SLOT_TYPES: {
+    [key: string]: string;
+  };
+  EXCHANGE_SLICE_OF_CAKE_COUNT: number;
   CHEF_CONTRACT_REWARD_PERCENTS: {
     [key: string]: number;
   };
@@ -225,6 +280,31 @@ export interface Config
     [key: string]: number;
   };
   RARITY_LEVELS_BY_TEMPLATE_ID: {
+    [key: string]: number;
+  };
+  RESTAURANT_NAME_PRICE: number;
+  COIN_CLAIM_TYPES: {
+    [key: string]: string;
+  };
+  COIN_TRANSACTION_TYPES: {
+    [key: string]: string;
+  };
+  WITHDRAW_FEE_DAYS_COUNT: number;
+  PRICE_UPGRADE_UNITS: {
+    [key: string]: number;
+  };
+  QUEST_SPEED_PERCENT_REQUIREMENTS: {
+    CARD_TYPE_COOK: {
+      [key: string]: number;
+    };
+    CARD_TYPE_CHEF: {
+      [key: string]: number;
+    };
+  };
+  UPGRADE_RELATIONS_BY_TEMPLATE_ID: {
+    [key: string]: number;
+  };
+  DISH_PRICES: {
     [key: string]: number;
   };
 }

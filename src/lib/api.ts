@@ -35,7 +35,10 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/user/restaurants/?${Helper.queryParamsToString(params)}`, options);
+      const res = await fetch(
+        `/v1/user/restaurants/?${Helper.queryParamsToString(params)}`,
+        options
+      );
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -51,7 +54,11 @@ const API = {
     }
   },
 
-  async getDishesToCook(restaurantId: string, characterCardId: string, characterId: string) {
+  async getDishesToCook(
+    restaurantId: string,
+    characterCardId: string,
+    characterId: string
+  ) {
     await navigation.openCookModal(characterId);
 
     const options = {
@@ -68,7 +75,10 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/restaurants/${restaurantId}/dishes-to-cook/get-or-create/`, options);
+      const res = await fetch(
+        `/v1/restaurants/${restaurantId}/dishes-to-cook/get-or-create/`,
+        options
+      );
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -76,7 +86,8 @@ const API = {
         throw new Error("Get dishes to cook request failed");
       }
 
-      const restaurantDishesToCook: RestaurantDishesToCook = resData.restaurant_dishes_to_cook;
+      const restaurantDishesToCook: RestaurantDishesToCook =
+        resData.restaurant_dishes_to_cook;
 
       return restaurantDishesToCook;
     } catch (error: any) {
@@ -107,7 +118,10 @@ const API = {
     };
 
     try {
-      const res = await fetch(next ? next : `/v1/restaurants/?${Helper.queryParamsToString(params)}`, options);
+      const res = await fetch(
+        next ? next : `/v1/restaurants/?${Helper.queryParamsToString(params)}`,
+        options
+      );
       const resData: RestaurantResponse = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -139,7 +153,8 @@ const API = {
         throw new Error("Character request failed");
       }
 
-      const characterList: (CharacterChef | CharacterCook)[] = resData.character_list.results;
+      const characterList: (CharacterChef | CharacterCook)[] =
+        resData.character_list.results;
 
       return characterList;
     } catch (error: any) {
@@ -147,7 +162,7 @@ const API = {
     }
   },
 
-  async setWorker(characterCardId: string, restaurantId: string, signContractWithRestaurantIsEnabled: boolean) {
+  async setWorker(characterCardId: string, restaurantId: string) {
     // await navigation.myRestaurants();
 
     const options = {
@@ -164,7 +179,10 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/restaurants/${restaurantId}/set-worker/`, options);
+      const res = await fetch(
+        `/v1/restaurants/${restaurantId}/set-worker/`,
+        options
+      );
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -172,14 +190,11 @@ const API = {
         throw new Error("Set worker request failure");
       }
 
-      logger(`Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`);
+      logger(
+        `Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`
+      );
       console.log("Set worker response data:", resData);
-      if (!signContractWithRestaurantIsEnabled) {
-        console.log("Await 1 minute after contract signing, before continue");
-        await Helper.sleep(60000);
-      } else {
-        await Helper.sleep(3000);
-      }
+      await Helper.sleep(2000);
     } catch (error: any) {
       logger(`${error.message}`);
     }
@@ -211,7 +226,11 @@ const API = {
     }
   },
 
-  async startCooking(restaurantId: string, characterCardId: string, dishIds: string[]) {
+  async startCooking(
+    restaurantId: string,
+    characterCardId: string,
+    dishIds: string[]
+  ) {
     const options = {
       method: "post",
       headers: {
@@ -226,7 +245,10 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/restaurants/${restaurantId}/start-cook/`, options);
+      const res = await fetch(
+        `/v1/restaurants/${restaurantId}/start-cook/`,
+        options
+      );
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {
@@ -234,7 +256,9 @@ const API = {
         throw new Error("Start cooking request failed");
       }
 
-      logger(`Character (id: ${characterCardId} start cooking in restaurant (id: ${restaurantId})`);
+      logger(
+        `Character (id: ${characterCardId} start cooking in restaurant (id: ${restaurantId})`
+      );
       console.log("Start cooking with response data:", resData);
       await Helper.sleep(5000);
       await navigation.closeModal();
@@ -256,7 +280,10 @@ const API = {
     };
 
     try {
-      const res = await fetch(`/v1/user/restaurants/${restaurantId}/open/`, options);
+      const res = await fetch(
+        `/v1/user/restaurants/${restaurantId}/open/`,
+        options
+      );
       const resData = await res.json();
 
       if (resData.status === "STATUS_FAILURE") {

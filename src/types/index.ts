@@ -42,6 +42,7 @@ export interface RestaurantTimerInfo {
   openTime: number;
   currentTime: number;
   timeSinceOpening: number;
+  isRestaurantOpened: boolean;
 }
 
 export interface DishToCook {
@@ -159,10 +160,6 @@ export interface CharacterResponse {
   status: string;
 }
 
-export interface SettingsConfig {
-  findContractForCookIsEnabled: boolean;
-}
-
 export interface RestaurantResponse {
   restaurant_list: {
     count: number;
@@ -177,7 +174,12 @@ export interface HelperCard {
   helper: Card;
 }
 
-export interface Config {
+export interface InternalConfig {
+  templateIdNames: { [key: number]: string };
+  templateImages: { [key: number]: string };
+}
+
+export interface GameConfig {
   rarities: string[];
   rarity_names: {
     RARITY_RAW: string;
@@ -205,11 +207,11 @@ export interface Config {
     CHARACTER_STATUS_ON_CONTRACT: string;
     CHARACTER_STATUS_ON_REST: string;
     CHARACTER_STATUS_WAITING_TO_OPEN_RESTAURANT: string;
+    CHARACTER_STATUS_ON_PVP: string;
   };
   sort_types: {
-    SORT_STATE: string;
-    SORT_TYPE: string;
-    SORT_RARITY: string;
+    fee: "Fee";
+    "-end_work": "Time";
   };
   cook_templates: number[];
   chef_templates: number[];
@@ -307,4 +309,26 @@ export interface Config {
   DISH_PRICES: {
     [key: string]: number;
   };
+  PRICE_PVP_COOK_JOIN: 400;
+  PVP_COOK_STAGES: {
+    [key: string]: {
+      title: string;
+      stage_number: number;
+      sub_stages: {
+        [key: string]: {
+          sub_stage_number: number;
+          end: string;
+        };
+      };
+    };
+  };
+  PRICE_QUEST_COOK_BY_RARITY_LEVEL: {
+    [key: string]: number;
+  };
+}
+
+export interface NextActionInfo {
+  restaurants?: Restaurant[];
+  characters?: Character[];
+  timeToNextAction?: number;
 }

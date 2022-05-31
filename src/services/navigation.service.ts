@@ -1,4 +1,4 @@
-import Helper from "./helper";
+import { sleep } from "../utils";
 
 const navigation = {
   async myRestaurants() {
@@ -26,7 +26,7 @@ const navigation = {
 
     if (cookBtnByCharId) {
       (cookBtnByCharId as HTMLElement).click();
-      await Helper.sleep(4000);
+      await sleep(4000);
     }
   },
 
@@ -34,19 +34,16 @@ const navigation = {
     const closeModalBtn = document.querySelector(".modal-close")?.children[0];
 
     if (closeModalBtn) {
-      (closeModalBtn as HTMLElement)?.click();
-      await Helper.sleep(1000);
+      (closeModalBtn as HTMLElement).click();
+      await sleep(1000);
     }
   },
 
   async handleMenuNavigation(domElement: Element | null) {
     if (!domElement) return;
-
     (domElement as HTMLElement).click();
-    await Helper.sleep(2000);
+    await sleep(2000);
   },
 };
-
-// ("ef2ece01-1007-4fae-b7ac-32d3066ab29d");
 
 export default navigation;

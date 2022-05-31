@@ -7,9 +7,9 @@ import {
   RestaurantDishesToCook,
   RestaurantResponse,
 } from "../types";
-import Helper from "./helper";
-import logger from "./logger";
-import navigation from "./navigation";
+import { queryParamsToString, sleep } from "../utils";
+import logger from "./logger.service";
+import navigation from "./navigation.service";
 
 const API = {
   async getMyRestaurants() {
@@ -36,7 +36,7 @@ const API = {
 
     try {
       const res = await fetch(
-        `/v1/user/restaurants/?${Helper.queryParamsToString(params)}`,
+        `/v1/user/restaurants/?${queryParamsToString(params)}`,
         options
       );
       const resData = await res.json();
@@ -119,7 +119,7 @@ const API = {
 
     try {
       const res = await fetch(
-        next ? next : `/v1/restaurants/?${Helper.queryParamsToString(params)}`,
+        next ? next : `/v1/restaurants/?${queryParamsToString(params)}`,
         options
       );
       const resData: RestaurantResponse = await res.json();
@@ -162,7 +162,11 @@ const API = {
     }
   },
 
-  async setWorker(characterCardId: string, restaurantId: string) {
+  async setWorker(
+    characterCardId: string,
+    restaurantId: string,
+    signContractWithRestaurantIsEnabled: boolean
+  ) {
     // await navigation.myRestaurants();
 
     const options = {
@@ -194,7 +198,12 @@ const API = {
         `Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`
       );
       console.log("Set worker response data:", resData);
-      await Helper.sleep(2000);
+      if (!signContractWithRestaurantIsEnabled) {
+        console.log("Await 10 sec after contract signing, before continue");
+        await sleep(10000);
+      } else {
+        await sleep(2000);
+      }
     } catch (error: any) {
       logger(`${error.message}`);
     }
@@ -260,7 +269,7 @@ const API = {
         `Character (id: ${characterCardId} start cooking in restaurant (id: ${restaurantId})`
       );
       console.log("Start cooking with response data:", resData);
-      await Helper.sleep(5000);
+      await sleep(5000);
       await navigation.closeModal();
       await navigation.myCharacters();
     } catch (error: any) {
@@ -293,7 +302,7 @@ const API = {
 
       logger("Restaurant has been opened");
       console.log("Open restaurant response data:", resData);
-      await Helper.sleep(5000);
+      await sleep(5000);
       await navigation.myRestaurants(); // update page
     } catch (error: any) {
       logger(`${error.message}`);

@@ -48,9 +48,6 @@ QoL script made to manage your restaurant
       - Calculate total profit
     - Return best variant by profit
 
-```
-    total_profit = profit_for_all_dishes * (restaurant_fee/100) * restaurant_rarity_coefficient
-```
 
 # DONATIONS AND CONTACTS
 

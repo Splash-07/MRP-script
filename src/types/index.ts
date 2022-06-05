@@ -250,6 +250,11 @@ export interface GameConfig {
   HELPER_DROP_CHANCES: {
     [key: string]: number;
   };
+  CHEF_CONTRACT_REWARD_PERCENTS_BY_RARITY_LEVEL: {
+    [key: string]: {
+      [key: string]: number;
+    };
+  };
   GAME_WALLET_NAME: string;
   GAME_COINS_WALLET_NAME: string;
   GAME_COINS_PRODUCTION_WALLET_NAME: string;

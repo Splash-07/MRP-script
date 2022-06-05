@@ -25,8 +25,7 @@ export const settingsSlice = createSlice({
       state.signWithChoosenRestaurant.isEnabled = false;
     },
     toggleSignContractWithRestaurant: (state) => {
-      state.signWithChoosenRestaurant.isEnabled =
-        !state.signWithChoosenRestaurant.isEnabled;
+      state.signWithChoosenRestaurant.isEnabled = !state.signWithChoosenRestaurant.isEnabled;
       state.findContractForCookIsEnabled = false;
     },
     setRestaurantId: (state, { payload }: { payload: string }) => {
@@ -35,10 +34,6 @@ export const settingsSlice = createSlice({
   },
 });
 
-export const {
-  toggleFindContractForCook,
-  toggleSignContractWithRestaurant,
-  setRestaurantId,
-} = settingsSlice.actions;
+export const { toggleFindContractForCook, toggleSignContractWithRestaurant, setRestaurantId } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

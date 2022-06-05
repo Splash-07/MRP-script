@@ -186,35 +186,29 @@ const restaurantManager = {
             additionalTime = 50000;
           }
           const timer = cookEnd - currentTime + additionalTime;
-          listOfTimers.push(timer);
-          return;
+
+          return listOfTimers.push(timer);
         }
 
         if (isCook(character)) {
           // dont return anything if all cook dont have contract and option for finding restaurant is disabled
+          let timer = 60000;
           if (
-            (!isCharacterResting && !this.hasContract(character) && !findContractForCookIsEnabled) ||
+            !isCharacterResting &&
+            !this.hasContract(character) &&
+            !findContractForCookIsEnabled &&
             !signContractWithRestaurantIsEnabled
           ) {
-            return;
-          }
-          if (
+            return listOfTimers.push(timer);
+          } else if (
             !isCharacterResting &&
             !this.hasContract(character) &&
             (findContractForCookIsEnabled || signContractWithRestaurantIsEnabled)
           ) {
-            let timer = 45000;
-            if (signContractWithRestaurantIsEnabled) {
-              listOfTimers.push(timer);
-              return;
-            }
-            // if cant find suitable restaurant, do it again in 2 minutes
-            timer = 120000;
-            listOfTimers.push(timer);
-            return;
+            return listOfTimers.push(timer);
           }
           // if character have contract and currenly resting
-          const timer = restEnd - currentTime + additionalTime;
+          timer = restEnd - currentTime + additionalTime;
           listOfTimers.push(timer);
         }
       });

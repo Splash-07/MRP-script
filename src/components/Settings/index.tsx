@@ -1,12 +1,22 @@
 import React from "react";
 import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box } from "@chakra-ui/react";
 import { useAppSelector } from "../../hooks/store.hooks";
-import { toggleFindContractForCook } from "../../store/slices/settings.slice";
+import {
+  setRestaurantId,
+  toggleFindContractForCook,
+  toggleSignContractWithRestaurant,
+} from "../../store/slices/settings.slice";
+import SettingsInput from "./SettingsInput";
 import SettingsCheckBox from "./SettingsCheckBox";
 
 const Settings = () => {
   const findContractForCookIsEnabled = useAppSelector((state) => state.settings.findContractForCookIsEnabled);
-
+  const signContractWithRestaurantIsEnabled = useAppSelector(
+    (state) => state.settings.signWithChoosenRestaurant.isEnabled
+  );
+  const signContractWithRestaurantId = useAppSelector(
+    (state) => state.settings.signWithChoosenRestaurant.restaurant_id
+  );
   return (
     <Accordion allowMultiple defaultIndex={[1, 2]} gap="3" display="flex" flexDir="column">
       <AccordionItem border="0px" background="#6A78B5" boxShadow="md">
@@ -39,6 +49,17 @@ const Settings = () => {
             >
               Automatically find contract for cook
             </Box>
+          </SettingsCheckBox>
+          <SettingsCheckBox
+            isEnabled={signContractWithRestaurantIsEnabled}
+            dispatchedAction={toggleSignContractWithRestaurant}
+          >
+            <SettingsInput
+              name="Send cook's to your restaurant"
+              isEnabled={signContractWithRestaurantIsEnabled}
+              initialValue={signContractWithRestaurantId}
+              dispatchAction={setRestaurantId}
+            />
           </SettingsCheckBox>
         </AccordionPanel>
       </AccordionItem>

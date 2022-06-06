@@ -440,6 +440,7 @@ const restaurantManager = {
 
     // You can select only one Dish from the Restaurant, only one Dish from the Chef
     // and as many Dishes as you like from the character Dishes category.
+    console.log("dishes to choose from", dishArray);
     const N = dishArray.length;
     const weights = dishArray.map((dish) => Math.round(dish.time));
     const profits = dishArray.map((dish) => dish.profit);
@@ -519,14 +520,14 @@ const restaurantManager = {
     const restaurantDishes = filteredRestaurantDishCardList.map((card) =>
       this.getDishInfo(card, helpersAccelerationRate, dishPullList)
     );
-    const bestRestaurantDish = this.findBestDishByProfit(restaurantDishes) ?? [];
+    const bestRestaurantDish = this.findBestDishByPricePerMinute(restaurantDishes) ?? [];
 
     // chef dishes
     const filteredChefDishCardList = this.filterAvailableDishCards(character, chefDishCards);
     const chefDishes = filteredChefDishCardList.map((card) =>
       this.getDishInfo(card, helpersAccelerationRate, dishPullList)
     );
-    const bestChefDish = this.findBestDishByProfit(chefDishes) ?? [];
+    const bestChefDish = this.findBestDishByPricePerMinute(chefDishes) ?? [];
 
     // character dishes
     const filteredCharacterDishCardList = this.filterAvailableDishCards(character, characterDishCards);
@@ -553,9 +554,9 @@ const restaurantManager = {
     return coefficientMap[rarity];
   },
 
-  findBestDishByProfit(dishList: Dish[]): [Dish] | [] {
+  findBestDishByPricePerMinute(dishList: Dish[]): [Dish] | [] {
     if (dishList.length < 1) return [];
-    const dish = dishList.reduce((prev, cur) => (cur.profit > prev.profit ? cur : prev));
+    const dish = dishList.reduce((prev, cur) => (cur.price / cur.time > prev.price / prev.time ? cur : prev));
     return [dish];
   },
 

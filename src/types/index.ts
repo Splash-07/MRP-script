@@ -17,16 +17,17 @@ export interface Dish {
   dish_atomichub_template_id: number;
   profit: number;
   time: number;
+  rarity: number;
 }
 
 export interface DishPull {
   atomichub_template_id: number;
   cooked_count: number;
   cooked_dish_mining_modifier: number;
-  id: "string";
-  name: "string";
+  id: string;
+  name: string;
   price: number;
-  rarity: "string";
+  rarity: "RARITY_RAW" | "RARITY_RARE" | "RARITY_MEDIUM_RARE" | "RARITY_MEDIUM_WELL" | "RARITY_WELL_DONE";
 }
 
 export interface Card {
@@ -332,7 +333,7 @@ export interface GameConfig {
   };
 }
 
-export interface NextActionInfo {
+export interface AccountState {
   restaurants?: Restaurant[];
   characters?: Character[];
   timeToNextAction?: number;

@@ -10,7 +10,7 @@ import {
   CharacterChef,
   RestaurantDishesToCook,
   DishToCook,
-  NextActionInfo,
+  AccountState,
 } from "../types";
 import { isChef, isCook } from "../types/typeguards";
 import API from "./api.service";
@@ -21,9 +21,9 @@ import { store } from "../store";
 import navigation from "./navigation.service";
 
 const restaurantManager = {
-  async manageRestaurants(): Promise<NextActionInfo> {
+  async manageRestaurants(): Promise<AccountState> {
     const myRestaurants = await API.getMyRestaurants();
-    console.log("restaurant:", myRestaurants);
+    console.log("restaurants:", myRestaurants);
 
     if (myRestaurants) {
       for (let i = 0; i < myRestaurants.length; i++) {
@@ -42,8 +42,8 @@ const restaurantManager = {
       }
     }
 
-    const nextActionInfo = await this.getNextActionInfo();
-    return nextActionInfo;
+    const accountState = await this.getAccountState();
+    return accountState;
   },
 
   async handleRestaurantStatus(restaurant: Restaurant) {
@@ -90,6 +90,7 @@ const restaurantManager = {
       console.log("Best dish combination", dishCombination);
       const sortedDishCombination = this.adjustDishQueue(dishCombination);
       console.log("Sorted dish combination (according to dishPull update)", sortedDishCombination);
+      console.log("===============================================");
       const dishIdsToCook = sortedDishCombination.map((dish) => dish.dish_id);
       if (dishIdsToCook) {
         await API.startCooking(restaurantId, characterCardId, dishIdsToCook);
@@ -157,7 +158,7 @@ const restaurantManager = {
     return result;
   },
 
-  async getNextActionInfo(): Promise<NextActionInfo> {
+  async getAccountState(): Promise<AccountState> {
     const restaurants = await API.getMyRestaurants();
     const characters = await API.getMyCharacters();
 
@@ -276,8 +277,11 @@ const restaurantManager = {
     };
   },
 
-  getHelpersAccelerationRate(helpers: Card[]): number {
+  getHelpersAccelerationRate(character: CharacterCook | CharacterChef): number {
     const config = store.getState().config.game!;
+    const helpers = isChef(character)
+      ? character.chef_helpers.map((card) => card.helper)
+      : character.cook_helpers.map((card) => card.helper);
 
     if (helpers.length < 1) return 0;
     const helpersValues = helpers.map((helperObj) => config.helper_speed_up[helperObj.atomichub_template_id]);
@@ -299,24 +303,25 @@ const restaurantManager = {
     return helpersValues.reduce((acc, cur, index) => (acc += cur * coefficients[index]), 0);
   },
 
+  // parse dish card to internal Dish
   getDishInfo(dish: DishToCook | Card, helpersAccelerationRate: number, dishPullList: DishPull[]): Dish {
     const config = store.getState().config.game!;
-
     const templateId =
       "dish_atomichub_template_id" in dish ? dish.dish_atomichub_template_id : dish.atomichub_template_id;
     const id = "dish_id" in dish ? dish.dish_id : dish.id;
 
     const dishPullById = dishPullList.find((dishPull) => dishPull.atomichub_template_id === templateId);
 
+    if (!dishPullById) {
+      throw Error("Cant find dish in dishPull by id");
+    }
+
     const cookTime = config.dishes_time_to_cook[templateId];
     const acceleratedTime = cookTime - cookTime * (helpersAccelerationRate / 100);
     const price = config.DISH_PRICES[templateId];
-    const name = dishPullById?.name;
-    const profit = dishPullById?.price;
-
-    if (!profit || !name) {
-      throw Error("Cant find dish in dishPull by id");
-    }
+    const name = dishPullById.name;
+    const profit = dishPullById.price;
+    const rarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[templateId];
 
     return {
       dish_id: id,
@@ -325,6 +330,7 @@ const restaurantManager = {
       price,
       dish_atomichub_template_id: templateId,
       time: acceleratedTime,
+      rarity,
     };
   },
 
@@ -443,7 +449,7 @@ const restaurantManager = {
     console.log("dishes to choose from", dishArray);
     const N = dishArray.length;
     const weights = dishArray.map((dish) => Math.round(dish.time));
-    const profits = dishArray.map((dish) => dish.profit);
+    const prices = dishArray.map((dish) => dish.price);
 
     const dp = Array(N)
       .fill(0)
@@ -452,7 +458,7 @@ const restaurantManager = {
     for (let i = 0; i < N; i++) dp[i][0] = 0;
 
     for (let c = 0; c <= maxTime; c++) {
-      if (weights[0] <= c) dp[0][c] = profits[0];
+      if (weights[0] <= c) dp[0][c] = prices[0];
     }
 
     for (let i = 1; i < N; i++) {
@@ -460,7 +466,7 @@ const restaurantManager = {
         let profit1 = 0,
           profit2 = 0;
         // include the item, if it is not more than the maxTime
-        if (weights[i] <= c) profit1 = profits[i] + dp[i - 1][c - weights[i]];
+        if (weights[i] <= c) profit1 = prices[i] + dp[i - 1][c - weights[i]];
         // exclude the item
         profit2 = dp[i - 1][c];
         // take maximum
@@ -475,7 +481,7 @@ const restaurantManager = {
       if (totalProfit != dp[i - 1][remaininTime]) {
         selectedDishes.push(dishArray[i]);
         remaininTime -= weights[i];
-        totalProfit -= profits[i];
+        totalProfit -= prices[i];
       }
     }
 
@@ -498,6 +504,7 @@ const restaurantManager = {
       dishPullList,
       character
     );
+
     const maxTime = 180;
     const dishCombination = this.getMaxProfitableCombinationOfDish(dishList, maxTime);
     return dishCombination;
@@ -507,32 +514,36 @@ const restaurantManager = {
     chefDishCards: (DishToCook | Card)[],
     restaurantDishCards: (DishToCook | Card)[],
     characterDishCards: (DishToCook | Card)[],
-    dishPullList: DishPull[],
+    dishPull: DishPull[],
     character: CharacterCook | CharacterChef
   ): Dish[] {
-    const helpers = isChef(character)
-      ? character.chef_helpers.map((card) => card.helper)
-      : character.cook_helpers.map((card) => card.helper);
-    const helpersAccelerationRate = this.getHelpersAccelerationRate(helpers);
+    const config = store.getState().config.game!;
+    const { atomichub_template_id, card_type } = character;
+    const characterRarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[atomichub_template_id];
+    const helpersAccelerationRate = this.getHelpersAccelerationRate(character);
 
-    // restaurant dishes
-    const filteredRestaurantDishCardList = this.filterAvailableDishCards(character, restaurantDishCards);
-    const restaurantDishes = filteredRestaurantDishCardList.map((card) =>
-      this.getDishInfo(card, helpersAccelerationRate, dishPullList)
-    );
-    const bestRestaurantDish = this.findBestDishByPricePerMinute(restaurantDishes) ?? [];
+    const bestRestaurantDish =
+      this.findBestDishByPricePerMinute(
+        card_type,
+        characterRarity,
+        restaurantDishCards,
+        helpersAccelerationRate,
+        dishPull,
+        "restaurant"
+      ) ?? [];
+    const bestChefDish =
+      this.findBestDishByPricePerMinute(
+        card_type,
+        characterRarity,
+        chefDishCards,
+        helpersAccelerationRate,
+        dishPull,
+        "chef"
+      ) ?? [];
 
-    // chef dishes
-    const filteredChefDishCardList = this.filterAvailableDishCards(character, chefDishCards);
-    const chefDishes = filteredChefDishCardList.map((card) =>
-      this.getDishInfo(card, helpersAccelerationRate, dishPullList)
-    );
-    const bestChefDish = this.findBestDishByPricePerMinute(chefDishes) ?? [];
-
-    // character dishes
-    const filteredCharacterDishCardList = this.filterAvailableDishCards(character, characterDishCards);
+    const filteredCharacterDishCardList = this.filterAvailableDishCards(card_type, characterRarity, characterDishCards);
     const characterDishes = filteredCharacterDishCardList.map((card) =>
-      this.getDishInfo(card, helpersAccelerationRate, dishPullList)
+      this.getDishInfo(card, helpersAccelerationRate, dishPull)
     );
 
     const dishList = [...characterDishes, ...bestRestaurantDish, ...bestChefDish];
@@ -554,20 +565,43 @@ const restaurantManager = {
     return coefficientMap[rarity];
   },
 
-  findBestDishByPricePerMinute(dishList: Dish[]): [Dish] | [] {
-    if (dishList.length < 1) return [];
-    const dish = dishList.reduce((prev, cur) => (cur.price / cur.time > prev.price / prev.time ? cur : prev));
+  findBestDishByPricePerMinute(
+    card_type: string,
+    characterRarity: number,
+    dishCards: (DishToCook | Card)[],
+    helpersAsseleration: number,
+    dishPull: DishPull[],
+    dishType?: "restaurant" | "chef"
+  ): [Dish] | [] {
+    const avaliblileRarity = card_type === "CARD_TYPE_CHEF" ? 5 : characterRarity;
+    const filteredDishCards = this.filterAvailableDishCards(card_type, avaliblileRarity, dishCards);
+    const dishList = filteredDishCards.map((card) => this.getDishInfo(card, helpersAsseleration, dishPull));
+    const bestDishesByRarity = this.filterDishBrRarity(dishList, avaliblileRarity);
+
+    if (bestDishesByRarity.length === 0) return [];
+    const dish = bestDishesByRarity.reduce((prev, cur) => (cur.price > prev.price ? cur : prev));
+    console.log(`Best ${dishType} dish is - ${dish.name}`);
     return [dish];
   },
 
-  filterAvailableDishCards(character: Character, dishCardList: (DishToCook | Card)[]) {
+  filterDishBrRarity(dishList: Dish[], avaliblileRarity: number): Dish[] {
+    let result: Dish[] = [];
+    let rarity = avaliblileRarity;
+    while (rarity > 0) {
+      result = dishList.filter((dish) => dish.rarity === rarity);
+      if (result.length > 0) break;
+
+      rarity--;
+    }
+    return result;
+  },
+
+  filterAvailableDishCards(characterType: string, characterRarity: number, dishCardList: (DishToCook | Card)[]) {
     const config = store.getState().config.game!;
 
-    if (character.card_type === config.card_types.CARD_TYPE_CHEF) {
+    if (characterType === config.card_types.CARD_TYPE_CHEF) {
       return dishCardList;
     }
-    // cook logic
-    const characterRarity = config.RARITY_LEVELS_BY_TEMPLATE_ID[character.atomichub_template_id];
 
     const filteredDishCardList = dishCardList.filter((dish) => {
       const templateId =

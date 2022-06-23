@@ -6,31 +6,31 @@ import {
   DishPull,
   RestaurantDishesToCook,
   RestaurantResponse,
-} from "../types";
-import { queryParamsToString, sleep } from "../utils";
-import logger from "./logger.service";
-import navigation from "./navigation.service";
+} from '../types';
+import { queryParamsToString, sleep } from '../utils';
+import logger from './logger.service';
+import navigation from './navigation.service';
 
 const API = {
   async getMyRestaurants() {
     const params: Params = {
-      search: "",
-      fee: "",
-      min_staff_rating: "",
-      rating: "",
-      sort: "",
-      rarity: "",
-      status: "",
+      search: '',
+      fee: '',
+      min_staff_rating: '',
+      rating: '',
+      sort: '',
+      rarity: '',
+      status: '',
       is_chef_exist: false,
       is_free_slot_exist: false,
     };
 
     const options = {
-      method: "get",
+      method: 'get',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        Accept: "application/json, text/plain, */*",
-        Referer: "https://game.medium-rare-potato.io/restaurants",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        Accept: 'application/json, text/plain, */*',
+        Referer: 'https://game.medium-rare-potato.io/restaurants',
       },
     };
 
@@ -41,9 +41,9 @@ const API = {
       );
       const resData = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Restaurant request failed");
+        throw new Error('Restaurant request failed');
       }
 
       const restaurantList: Restaurant[] = resData.restaurant_list.results;
@@ -62,12 +62,12 @@ const API = {
     await navigation.openCookModal(characterId);
 
     const options = {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        Accept: "application/json, text/plain, */*",
-        Referer: "https://game.medium-rare-potato.io/characters",
-        "Content-Type": "application/json",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        Accept: 'application/json, text/plain, */*',
+        Referer: 'https://game.medium-rare-potato.io/characters',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         worker_card_id: characterCardId,
@@ -81,9 +81,9 @@ const API = {
       );
       const resData = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Get dishes to cook request failed");
+        throw new Error('Get dishes to cook request failed');
       }
 
       const restaurantDishesToCook: RestaurantDishesToCook =
@@ -97,23 +97,23 @@ const API = {
 
   async getOpenedRestaurants(next?: string) {
     const params: Params = {
-      search: "",
-      fee: "",
-      min_staff_rating: "",
-      rating: "",
-      sort: "",
-      rarity: "",
-      status: "RESTAURANT_STATUS_OPENED",
+      search: '',
+      fee: '',
+      min_staff_rating: '',
+      rating: '',
+      sort: '',
+      rarity: '',
+      status: 'RESTAURANT_STATUS_OPENED',
       is_chef_exist: false,
       is_free_slot_exist: true,
     };
 
     const options = {
-      method: "get",
+      method: 'get',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        Accept: "application/json, text/plain, */*",
-        Referer: "https://game.medium-rare-potato.io/restaurants",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        Accept: 'application/json, text/plain, */*',
+        Referer: 'https://game.medium-rare-potato.io/restaurants',
       },
     };
 
@@ -124,9 +124,9 @@ const API = {
       );
       const resData: RestaurantResponse = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Restaurant request failed");
+        throw new Error('Restaurant request failed');
       }
 
       return resData;
@@ -137,10 +137,10 @@ const API = {
 
   async getMyCharacters() {
     const options = {
-      method: "get",
+      method: 'get',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        Accept: "application/json, text/plain, */*",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        Accept: 'application/json, text/plain, */*',
       },
     };
 
@@ -148,9 +148,9 @@ const API = {
       const res = await fetch(`/v1/user/characters/`, options);
       const resData = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Character request failed");
+        throw new Error('Character request failed');
       }
 
       const characterList: (CharacterChef | CharacterCook)[] =
@@ -170,11 +170,11 @@ const API = {
     // await navigation.myRestaurants();
 
     const options = {
-      method: "post",
+      method: 'post',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         worker_card_id: characterCardId,
@@ -189,17 +189,17 @@ const API = {
       );
       const resData = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Set worker request failure");
+        throw new Error('Set worker request failure');
       }
 
       logger(
         `Restaurant (id: ${restaurantId}) has signed contract with our cook (id:${characterCardId})`
       );
-      console.log("Set worker response data:", resData);
+      console.log('Set worker response data:', resData);
       if (!signContractWithRestaurantIsEnabled) {
-        console.log("Await 10 sec after contract signing, before continue");
+        console.log('Await 10 sec after contract signing, before continue');
         await sleep(10000);
       } else {
         await sleep(2000);
@@ -211,10 +211,10 @@ const API = {
 
   async getDishPullList() {
     const options = {
-      method: "get",
+      method: 'get',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        Accept: "application/json, text/plain, */*",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        Accept: 'application/json, text/plain, */*',
       },
     };
 
@@ -222,9 +222,9 @@ const API = {
       const res = await fetch(`v1/dish-pool/`, options);
       const resData = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Dish pull request failed");
+        throw new Error('Dish pull request failed');
       }
 
       const dishPullList: DishPull[] = resData.dish_pool;
@@ -241,11 +241,11 @@ const API = {
     dishIds: string[]
   ) {
     const options = {
-      method: "post",
+      method: 'post',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        "Content-Type": "application/json",
-        Accept: "application/json, text/plain, */*",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/plain, */*',
       },
       body: JSON.stringify({
         worker_card_id: characterCardId,
@@ -260,15 +260,15 @@ const API = {
       );
       const resData = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Start cooking request failed");
+        throw new Error('Start cooking request failed');
       }
 
       logger(
         `Character (id: ${characterCardId} start cooking in restaurant (id: ${restaurantId})`
       );
-      console.log("Start cooking with response data:", resData);
+      console.log('Start cooking with response data:', resData);
       await sleep(5000);
       await navigation.closeModal();
       await navigation.myCharacters();
@@ -281,10 +281,10 @@ const API = {
     await navigation.myRestaurants();
 
     const options = {
-      method: "post",
+      method: 'post',
       headers: {
-        "api-key": JSON.parse(window.localStorage.getItem("user")!).api_key,
-        Accept: "application/json, text/plain, */*",
+        'api-key': JSON.parse(window.localStorage.getItem('user')!).api_key,
+        Accept: 'application/json, text/plain, */*',
       },
     };
 
@@ -295,13 +295,13 @@ const API = {
       );
       const resData = await res.json();
 
-      if (resData.status === "STATUS_FAILURE") {
+      if (resData.status === 'STATUS_FAILURE') {
         console.log(resData);
-        throw new Error("Open restaurant request failed");
+        throw new Error('Open restaurant request failed');
       }
 
-      logger("Restaurant has been opened");
-      console.log("Open restaurant response data:", resData);
+      logger('Restaurant has been opened');
+      console.log('Open restaurant response data:', resData);
       await sleep(5000);
       await navigation.myRestaurants(); // update page
     } catch (error: any) {

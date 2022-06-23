@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 export interface AppState {
   expanded: boolean;
@@ -9,7 +9,7 @@ const initialState: AppState = {
 };
 
 export const appSlice = createSlice({
-  name: "app",
+  name: 'app',
   initialState,
   reducers: {
     toggleMenuExpand: (state) => {

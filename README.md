@@ -29,7 +29,6 @@ QoL script made to manage your restaurant
 - Calculate time until next action
 - Sleep until next action
 
-
 ## Main algorithms workflow
 
 1.  getBestDishCombination()
@@ -47,7 +46,6 @@ QoL script made to manage your restaurant
       - Firing getBestDishCombination()
       - Calculate total profit
     - Return best variant by profit
-
 
 # DONATIONS AND CONTACTS
 

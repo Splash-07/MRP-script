@@ -1,10 +1,10 @@
-import React from "react";
-import { FC, ReactNode } from "react";
-import { ActionCreatorWithoutPayload } from "@reduxjs/toolkit";
+import React from 'react';
+import { FC, ReactNode } from 'react';
+import { ActionCreatorWithoutPayload } from '@reduxjs/toolkit';
 
-import { CheckIcon } from "@chakra-ui/icons";
-import { Flex, IconButton } from "@chakra-ui/react";
-import { useAppDispatch, useAppSelector } from "../../hooks/store.hooks";
+import { CheckIcon } from '@chakra-ui/icons';
+import { Flex, IconButton } from '@chakra-ui/react';
+import { useAppDispatch, useAppSelector } from '../../hooks/store.hooks';
 
 interface SettingsCheckBoxInterface {
   isEnabled?: boolean;
@@ -22,7 +22,7 @@ const SettingsCheckBox: FC<SettingsCheckBoxInterface> = ({
   const dispatch = useAppDispatch();
 
   function handleClick() {
-    if (isInitialized) return alert("Turn off script, before change settings");
+    if (isInitialized) return alert('Turn off script, before change settings');
     dispatch(dispatchedAction());
   }
 
@@ -33,8 +33,8 @@ const SettingsCheckBox: FC<SettingsCheckBoxInterface> = ({
         backdropBlur="lg"
         backgroundColor="whiteAlpha.300"
         borderColor="whiteAlpha.300"
-        _hover={{ bg: "whiteAlpha.500" }}
-        _focus={{ outlineColor: "orange.50", outlineWidth: "1px" }}
+        _hover={{ bg: 'whiteAlpha.500' }}
+        _focus={{ outlineColor: 'orange.50', outlineWidth: '1px' }}
         boxShadow="md"
         aria-label="check"
         icon={isEnabled ? <CheckIcon color="whiteAlpha.900" /> : undefined}

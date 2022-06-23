@@ -1,4 +1,4 @@
-import { sleep } from "../utils";
+import { sleep } from '../utils';
 
 const navigation = {
   async myRestaurants() {
@@ -17,7 +17,7 @@ const navigation = {
     await this.myCharacters();
 
     const characterBtnList: HTMLElement[] = Array.from(
-      document.querySelectorAll(".character-buttons")
+      document.querySelectorAll('.character-buttons')
     );
 
     const cookBtnByCharId = characterBtnList.find((btnPair) =>
@@ -31,7 +31,7 @@ const navigation = {
   },
 
   async closeModal() {
-    const closeModalBtn = document.querySelector(".modal-close")?.children[0];
+    const closeModalBtn = document.querySelector('.modal-close')?.children[0];
 
     if (closeModalBtn) {
       (closeModalBtn as HTMLElement).click();

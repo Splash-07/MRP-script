@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { Character, AccountState, Restaurant } from "../../types";
+import { createSlice } from '@reduxjs/toolkit';
+import { Character, AccountState, Restaurant } from '../../types';
 
 export interface RestaurantState {
   isInitialized: boolean;
@@ -26,7 +26,7 @@ const initialState: RestaurantState = {
 };
 
 export const restaurantSlice = createSlice({
-  name: "restaurant",
+  name: 'restaurant',
   initialState,
   reducers: {
     update: (state, { payload }: { payload: AccountState }) => {
@@ -48,6 +48,7 @@ export const restaurantSlice = createSlice({
   },
 });
 
-export const { update, setLoading, setInitialize, setNextActionAllowance } = restaurantSlice.actions;
+export const { update, setLoading, setInitialize, setNextActionAllowance } =
+  restaurantSlice.actions;
 
 export default restaurantSlice.reducer;

@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, GridItem, Skeleton, Text } from "@chakra-ui/react";
+import React from 'react';
+import { Box, GridItem, Skeleton, Text } from '@chakra-ui/react';
 
 const StatusInfoSkeletonRow = () => {
   return (

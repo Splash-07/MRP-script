@@ -27,7 +27,12 @@ export interface DishPull {
   id: string;
   name: string;
   price: number;
-  rarity: "RARITY_RAW" | "RARITY_RARE" | "RARITY_MEDIUM_RARE" | "RARITY_MEDIUM_WELL" | "RARITY_WELL_DONE";
+  rarity:
+    | 'RARITY_RAW'
+    | 'RARITY_RARE'
+    | 'RARITY_MEDIUM_RARE'
+    | 'RARITY_MEDIUM_WELL'
+    | 'RARITY_WELL_DONE';
 }
 
 export interface Card {
@@ -68,6 +73,7 @@ export interface CharacterTimerInfo {
   isRestaurantOpened: boolean;
   isCharacterCanStartCook: boolean;
   isCharacterResting: boolean;
+  inPvp: boolean;
 }
 
 export interface RestaurantContract {
@@ -112,7 +118,7 @@ export interface Restaurant {
   internal_team_total_slots: number;
   last_calculated: string;
   min_staff_rating: number;
-  name: "Restaurant";
+  name: 'Restaurant';
   restaurant_dishes?: { dish: Card }[];
   chefs_dishes?: { dish: Card }[];
   restaurant_worker_contracts: RestaurantContract[];
@@ -140,6 +146,8 @@ export interface Character {
   status: string;
   updated: string;
   work_end: string;
+  pvp_end: string;
+  battle_pvp_end: string;
 }
 
 export interface CharacterChef extends Character {
@@ -211,8 +219,8 @@ export interface GameConfig {
     CHARACTER_STATUS_ON_PVP: string;
   };
   sort_types: {
-    fee: "Fee";
-    "-end_work": "Time";
+    fee: 'Fee';
+    '-end_work': 'Time';
   };
   cook_templates: number[];
   chef_templates: number[];

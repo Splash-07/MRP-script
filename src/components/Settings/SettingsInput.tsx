@@ -1,9 +1,9 @@
-import React, { FC, useMemo, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/store.hooks";
-import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
-import debounce from "lodash.debounce";
+import React, { FC, useMemo, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../hooks/store.hooks';
+import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import debounce from 'lodash.debounce';
 
-import { Flex, Input, InputGroup, InputLeftAddon } from "@chakra-ui/react";
+import { Flex, Input, InputGroup, InputLeftAddon } from '@chakra-ui/react';
 
 interface SettingsInputInterface {
   initialValue: string;
@@ -33,7 +33,7 @@ const SettingsInput: FC<SettingsInputInterface> = ({
   );
 
   function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
-    if (isInitialized) return alert("Turn off script, before change settings");
+    if (isInitialized) return alert('Turn off script, before change settings');
     const value = e.target.value;
     setValue(value);
     dispatchValue(value.trim());

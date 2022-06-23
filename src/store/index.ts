@@ -1,4 +1,4 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import {
   persistReducer,
   persistStore,
@@ -8,15 +8,15 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
-} from "redux-persist";
-import storage from "redux-persist/lib/storage";
-import appReducer from "./slices/app.slice";
-import restaurantReducer from "./slices/restaurant.slice";
-import settingsReducer from "./slices/settings.slice";
-import configReducer from "./slices/config.slice";
+} from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import appReducer from './slices/app.slice';
+import restaurantReducer from './slices/restaurant.slice';
+import settingsReducer from './slices/settings.slice';
+import configReducer from './slices/config.slice';
 
 const settingsPersistConfig = {
-  key: "settings",
+  key: 'settings',
   storage,
 };
 

@@ -1,6 +1,6 @@
-import { Action, ThunkDispatch } from "@reduxjs/toolkit";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../store";
+import { Action, ThunkDispatch } from '@reduxjs/toolkit';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../store';
 
 type ThunkAppDispatch = ThunkDispatch<RootState, void, Action>;
 

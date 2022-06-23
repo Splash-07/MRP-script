@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 export interface SettingsState {
   findContractForCookIsEnabled: boolean;
@@ -12,12 +12,12 @@ const initialState: SettingsState = {
   findContractForCookIsEnabled: true,
   signWithChoosenRestaurant: {
     isEnabled: false,
-    restaurant_id: "",
+    restaurant_id: '',
   },
 };
 
 export const settingsSlice = createSlice({
-  name: "settings",
+  name: 'settings',
   initialState,
   reducers: {
     toggleFindContractForCook: (state) => {

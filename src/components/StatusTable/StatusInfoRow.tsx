@@ -1,9 +1,9 @@
-import React, { FC, useEffect, useState } from "react";
-import { GridItem, Image, Text } from "@chakra-ui/react";
-import restaurantManager from "../../services/restaurantManager.service";
-import { isCharacter, isRestaurant } from "../../types/typeguards";
-import { Character, Restaurant } from "../../types";
-import { useAppSelector } from "../../hooks/store.hooks";
+import React, { FC, useEffect, useState } from 'react';
+import { GridItem, Image, Text } from '@chakra-ui/react';
+import restaurantManager from '../../services/restaurantManager.service';
+import { isCharacter, isRestaurant } from '../../types/typeguards';
+import { Character, Restaurant } from '../../types';
+import { useAppSelector } from '../../hooks/store.hooks';
 
 interface StatusInfoRowProps {
   content: Restaurant | Character;
@@ -24,7 +24,7 @@ const StatusInfoRow: FC<StatusInfoRowProps> = ({ content }) => {
     if (isRestaurant(content)) {
       const { isRestaurantOpened } =
         restaurantManager.getRestaurantTimerInfo(content);
-      setStatus(isRestaurantOpened ? "Opened" : "Closed");
+      setStatus(isRestaurantOpened ? 'Opened' : 'Closed');
     }
 
     if (isCharacter(content)) {
@@ -33,13 +33,13 @@ const StatusInfoRow: FC<StatusInfoRowProps> = ({ content }) => {
         getCharacterTimerInfo(content);
 
       if (isCharacterResting) {
-        setStatus("Resting");
+        setStatus('Resting');
       } else if (hasContract(content) && isRestaurantOpened) {
         const currentTime = Date.now();
         if (currentTime < cookEnd) {
-          setStatus("Working");
+          setStatus('Working');
         } else {
-          setStatus("Waiting");
+          setStatus('Waiting');
         }
       }
     }

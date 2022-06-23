@@ -1,19 +1,19 @@
-import { defineConfig } from "vite";
-import reactRefresh from "@vitejs/plugin-react-refresh";
-import { resolve } from "path";
+import { defineConfig } from 'vite';
+import reactRefresh from '@vitejs/plugin-react-refresh';
+import { resolve } from 'path';
 export default defineConfig({
   plugins: [reactRefresh()],
   build: {
     minify: true,
-    assetsDir: "assets",
+    assetsDir: 'assets',
     rollupOptions: {
       // input: {
-      //   test: resolve("./src/test.ts"),
+      //   script: resolve('./src/script.ts'),
       // },
       output: {
-        assetFileNames: "[name][extname]",
-        entryFileNames: "[name].js",
-        chunkFileNames: "[name].js",
+        assetFileNames: '[name][extname]',
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
       },
     },
   },

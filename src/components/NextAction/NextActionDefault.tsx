@@ -1,7 +1,7 @@
-import React from "react";
-import { Box, Flex, Text } from "@chakra-ui/react";
-import { useAppSelector } from "../../hooks/store.hooks";
-import { MemoisedCountdown } from "../CountdownTimer";
+import React from 'react';
+import { Box, Flex, Text } from '@chakra-ui/react';
+import { useAppSelector } from '../../hooks/store.hooks';
+import { MemoisedCountdown } from '../CountdownTimer';
 
 const NextActionDefault = () => {
   const next = useAppSelector((state) => state.restaurant.next);

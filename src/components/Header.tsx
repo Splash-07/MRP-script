@@ -1,9 +1,9 @@
-import React from "react";
-import { Button, Flex, Heading, Icon, Image, Link } from "@chakra-ui/react";
-import { ChevronRightIcon } from "@chakra-ui/icons";
-import { BsGithub } from "react-icons/bs";
-import { useAppDispatch, useAppSelector } from "../hooks/store.hooks";
-import { toggleMenuExpand } from "../store/slices/app.slice";
+import React from 'react';
+import { Button, Flex, Heading, Icon, Image, Link } from '@chakra-ui/react';
+import { ChevronRightIcon } from '@chakra-ui/icons';
+import { BsGithub } from 'react-icons/bs';
+import { useAppDispatch, useAppSelector } from '../hooks/store.hooks';
+import { toggleMenuExpand } from '../store/slices/app.slice';
 
 const Header = () => {
   const internalConfig = useAppSelector((state) => state.config.internal);
@@ -26,7 +26,7 @@ const Header = () => {
         background="0px 0px"
         margin="0px"
         p="0px"
-        _hover={{ background: "0px 0px" }}
+        _hover={{ background: '0px 0px' }}
         onClick={handleMenuExpand}
       >
         <ChevronRightIcon w="22px" h="22px" />
@@ -48,7 +48,7 @@ const Header = () => {
           w="30px"
           transition="color .2s ease"
           color="whiteAlpha.500"
-          _hover={{ color: "whiteAlpha.800" }}
+          _hover={{ color: 'whiteAlpha.800' }}
         />
       </Link>
     </Flex>

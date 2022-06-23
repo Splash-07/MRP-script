@@ -1,4 +1,4 @@
-import restaurantManager from "./services/restaurantManager.service";
+import restaurantManager from './services/restaurantManager.service';
 
 (async () => {
   console.clear();

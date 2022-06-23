@@ -1,10 +1,10 @@
-import { Button, Flex } from "@chakra-ui/react";
-import React, { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/store.hooks";
+import { Button, Flex } from '@chakra-ui/react';
+import React, { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../hooks/store.hooks';
 import {
   setInitialize,
   setNextActionAllowance,
-} from "../store/slices/restaurant.slice";
+} from '../store/slices/restaurant.slice';
 
 const StartButton = () => {
   const isInitialized = useAppSelector(
@@ -30,18 +30,18 @@ const StartButton = () => {
       <Button
         cursor="pointer"
         color="whiteAlpha.900"
-        backgroundColor={isInitialized ? "whiteAlpha.400" : "#5D6AA2"}
+        backgroundColor={isInitialized ? 'whiteAlpha.400' : '#5D6AA2'}
         disabled={isStartButtonDisabled}
         fontSize="1.1rem"
         letterSpacing="1px"
         padding="5px 10px"
         boxShadow="md"
         justifySelf="center"
-        _hover={{ backgroundColor: "whiteAlpha.100" }}
+        _hover={{ backgroundColor: 'whiteAlpha.100' }}
         onClick={handleClick}
         margin="4"
       >
-        {isInitialized ? "Stop Script" : "Start Script"}
+        {isInitialized ? 'Stop Script' : 'Start Script'}
       </Button>
     </Flex>
   );

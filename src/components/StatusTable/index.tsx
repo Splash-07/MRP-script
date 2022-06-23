@@ -1,8 +1,8 @@
-import React from "react";
-import { Flex, Grid, GridItem, Text } from "@chakra-ui/react";
-import { useAppSelector } from "../../hooks/store.hooks";
-import StatusInfoRow from "./StatusInfoRow";
-import StatusInfoSkeletonRow from "./StatusInfoSkeletonRow";
+import React from 'react';
+import { Flex, Grid, GridItem, Text } from '@chakra-ui/react';
+import { useAppSelector } from '../../hooks/store.hooks';
+import StatusInfoRow from './StatusInfoRow';
+import StatusInfoSkeletonRow from './StatusInfoSkeletonRow';
 
 const StatusTable = () => {
   const isLoading = useAppSelector((state) => state.restaurant.isLoading);
@@ -16,15 +16,15 @@ const StatusTable = () => {
   return (
     <Flex
       css={{
-        "&::-webkit-scrollbar": {
-          width: "4px",
+        '&::-webkit-scrollbar': {
+          width: '4px',
         },
-        "&::-webkit-scrollbar-track": {
-          width: "6px",
+        '&::-webkit-scrollbar-track': {
+          width: '6px',
         },
-        "&::-webkit-scrollbar-thumb": {
-          background: "white",
-          borderRadius: "24px",
+        '&::-webkit-scrollbar-thumb': {
+          background: 'white',
+          borderRadius: '24px',
         },
       }}
       maxH="300px"

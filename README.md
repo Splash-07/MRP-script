@@ -9,7 +9,7 @@ QoL script made to manage your restaurant
 # Important
 
 - You have to be logged in and verified on [MRP Game](https://game.medium-rare-potato.io) before using this script
-- Function, that making best dish combination is not precise. If it will be requested, i will increase precision but that also increase execution time (Time complexity of function is O(N\*M)). In most cases default precision is sufficient enough
+- Function, that making best dish combination is not precise. If it will be requested, i will increase precision but that also increase execution time (Time complexity of function is O(N\*M)). In most cases default precision is sufficient
 
 
 # Usage
